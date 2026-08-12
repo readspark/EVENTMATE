@@ -1,0 +1,8 @@
+{
+  "name": "EventMate",
+  "description": "Your intelligent partner for planning and organizing events. Use AI to generate creative ideas, manage your event details, and get planning advice from a helpful AI assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
