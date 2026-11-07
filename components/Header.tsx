@@ -1,22 +1,30 @@
-
 import React, { useState, useEffect, useRef } from 'react';
+import { Sparkles, Calendar, Plus, User as UserIcon, LogOut, Settings } from 'lucide-react';
 import type { User } from '../types';
 
-const ClipboardListIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-    </svg>
-);
-
 interface HeaderProps {
-    user: User | null;
-    onMyEventsClick: () => void;
-    onSignInClick: () => void;
-    onSignOutClick: () => void;
-    onEditProfileClick: () => void;
+  user: User | null;
+  activeView: 'events' | 'ideation';
+  onViewChange: (view: 'events' | 'ideation') => void;
+  onNewEventClick: () => void;
+  onMyEventsClick: () => void;
+  onSignInClick: () => void;
+  onSignOutClick: () => void;
+  onEditProfileClick: () => void;
+  activeEventCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ user, onMyEventsClick, onSignInClick, onSignOutClick, onEditProfileClick }) => {
+export const Header: React.FC<HeaderProps> = ({
+  user,
+  activeView,
+  onViewChange,
+  onNewEventClick,
+  onMyEventsClick,
+  onSignInClick,
+  onSignOutClick,
+  onEditProfileClick,
+  activeEventCount,
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -26,70 +34,106 @@ export const Header: React.FC<HeaderProps> = ({ user, onMyEventsClick, onSignInC
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-    
-  const handleSignOut = () => {
-    setIsDropdownOpen(false);
-    onSignOutClick();
-  }
-  
-  const handleEditProfile = () => {
-    setIsDropdownOpen(false);
-    onEditProfileClick();
-  }
 
   return (
-    <header className="bg-gradient-to-r from-slate-900 to-slate-700 shadow-lg">
-      <div className="container mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-            <ClipboardListIcon />
-            <h1 className="text-2xl font-bold text-white tracking-tight">EventMate</h1>
+    <header className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80">
+      <div className="container mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-6">
+        {/* Zone 1: Wordmark */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-600/30">
+            <Calendar className="w-4 h-4" />
+          </div>
+          <span className="text-base font-bold text-white tracking-tight">
+            EventMate
+          </span>
         </div>
-        <div className="flex items-center space-x-4">
+
+        {/* Zone 2: Clean View Navigation Tabs */}
+        <nav className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
           <button
-            onClick={onMyEventsClick}
-            className="hidden sm:block bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-slate-500 transition-colors duration-300"
+            onClick={() => onViewChange('events')}
+            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap shrink-0 flex items-center gap-2 ${
+              activeView === 'events'
+                ? 'bg-slate-800 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
           >
-            My Events
+            <span>Events</span>
+            <span className="font-mono text-[11px] text-slate-400 tabular-nums">
+              {activeEventCount}
+            </span>
           </button>
+
+          <button
+            onClick={() => onViewChange('ideation')}
+            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+              activeView === 'ideation'
+                ? 'bg-slate-800 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <span>AI Brainstorm</span>
+          </button>
+        </nav>
+
+        {/* Zone 3: Primary Action + User Profile */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={onNewEventClick}
+            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2 px-3.5 rounded-lg shadow-sm transition-colors whitespace-nowrap shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Event</span>
+          </button>
+
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="h-10 w-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-indigo-500"
+                className="h-8 w-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200 font-bold text-xs hover:bg-slate-700 focus:outline-none transition-colors"
+                title={user.name}
               >
                 {user.name.charAt(0).toUpperCase()}
               </button>
+
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-slate-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div
-                    onClick={handleEditProfile} 
-                    className="p-4 border-b border-slate-700 hover:bg-slate-700 cursor-pointer"
+                    onClick={() => { setIsDropdownOpen(false); onEditProfileClick(); }}
+                    className="p-3 border-b border-slate-800/80 hover:bg-slate-800/60 cursor-pointer transition-colors"
                   >
-                    <p className="font-medium text-white truncate">{user.name}</p>
-                    <p className="text-sm text-slate-400 truncate">{user.email}</p>
-                    <p className="text-xs text-slate-500 mt-2">Click to edit profile</p>
+                    <p className="font-semibold text-white text-xs truncate">{user.name}</p>
+                    <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
                   </div>
-                  <div className="py-1">
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-600 hover:text-white transition-colors duration-150"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
+
+                  <button
+                    onClick={() => { setIsDropdownOpen(false); onMyEventsClick(); }}
+                    className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-800/60 flex items-center gap-2"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <span>View All Planned</span>
+                  </button>
+
+                  <div className="border-t border-slate-800/80 my-1" />
+
+                  <button
+                    onClick={() => { setIsDropdownOpen(false); onSignOutClick(); }}
+                    className="w-full text-left px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
+                  </button>
                 </div>
               )}
             </div>
           ) : (
             <button
               onClick={onSignInClick}
-              className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-indigo-500 transition-colors duration-300"
+              className="text-xs font-medium text-slate-300 hover:text-white py-1.5 px-3 rounded-lg hover:bg-slate-800 transition-colors"
             >
               Sign In
             </button>

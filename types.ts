@@ -1,8 +1,21 @@
+export type EventCategory = 'Conference' | 'Workshop' | 'Meetup' | 'Webinar' | 'Networking' | 'Executive';
+
+export type EventStatus = 'Draft' | 'Upcoming' | 'In Progress' | 'Completed';
+
+export interface AgendaItem {
+  id: string;
+  time: string;
+  title: string;
+  speakerOrLead?: string;
+  notes?: string;
+}
 
 export interface Registration {
   id: number;
   name: string;
   email: string;
+  checkedIn?: boolean;
+  registeredAt?: string;
 }
 
 export interface Event {
@@ -10,8 +23,14 @@ export interface Event {
   title: string;
   description: string;
   date: string;
+  time?: string;
   location: string;
+  isVirtual?: boolean;
+  category?: EventCategory;
+  status?: EventStatus;
+  capacity?: number;
   registrations: Registration[];
+  agenda?: AgendaItem[];
 }
 
 export interface ChatMessage {
@@ -24,4 +43,11 @@ export interface ChatMessage {
 export interface User {
   name: string;
   email: string;
+  role?: string;
+}
+
+export interface ToastNotification {
+  id: string;
+  message: string;
+  type?: 'success' | 'info' | 'warning';
 }

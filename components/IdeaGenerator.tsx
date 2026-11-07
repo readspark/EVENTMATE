@@ -1,85 +1,163 @@
 import React, { useState } from 'react';
+import { Sparkles, Loader2, Plus, ArrowRight, Lightbulb } from 'lucide-react';
 import { generateEventIdeas } from '../services/geminiService';
-import { BulletPointDescription } from './BulletPointDescription';
+import { INSPIRATION_THEMES } from '../constants';
+import type { EventCategory } from '../types';
 
 interface IdeaGeneratorProps {
-    onEventGenerated: (title: string, description: string) => void;
+  onEventGenerated: (
+    title: string, 
+    description: string, 
+    category?: EventCategory, 
+    capacity?: number
+  ) => void;
+  onToast?: (message: string) => void;
 }
 
-const LoadingSpinner: React.FC<{ size?: string }> = ({ size = '5' }) => (
-  <div className={`animate-spin rounded-full h-${size} w-${size} border-b-2 border-white`}></div>
-);
-
-const LightbulbIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-    </svg>
-);
-
-export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated }) => {
+export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, onToast }) => {
   const [theme, setTheme] = useState('');
-  const [ideas, setIdeas] = useState<{title: string, description: string}[]>([]);
+  const [ideas, setIdeas] = useState<{ title: string; description: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleGenerate = async () => {
-    if (!theme.trim()) return;
+  const handleGenerate = async (queryTheme?: string) => {
+    const activeTheme = (queryTheme || theme).trim();
+    if (!activeTheme) return;
+
+    if (queryTheme) setTheme(queryTheme);
     setIsLoading(true);
     setIdeas([]);
-    const generatedIdeas = await generateEventIdeas(theme);
+
+    const generatedIdeas = await generateEventIdeas(activeTheme);
     setIdeas(generatedIdeas);
     setIsLoading(false);
+
+    if (onToast && generatedIdeas.length > 0) {
+      onToast(`Generated ${generatedIdeas.length} creative concepts for "${activeTheme}"`);
+    }
   };
 
-  const handleAddEvent = (idea: {title: string, description: string}) => {
-    onEventGenerated(idea.title, idea.description);
-    setIdeas(prevIdeas => prevIdeas.filter(i => i.title !== idea.title));
-  };
+  const handleAddEvent = (idea: { title: string; description: string }) => {
+    // Derive sensible category from title
+    let category: EventCategory = 'Conference';
+    const lower = (idea.title + ' ' + idea.description).toLowerCase();
+    if (lower.includes('workshop') || lower.includes('masterclass') || lower.includes('hands-on')) {
+      category = 'Workshop';
+    } else if (lower.includes('mixer') || lower.includes('networking') || lower.includes('dinner')) {
+      category = 'Networking';
+    } else if (lower.includes('webinar') || lower.includes('virtual') || lower.includes('online')) {
+      category = 'Webinar';
+    } else if (lower.includes('executive') || lower.includes('summit') || lower.includes('roundtable')) {
+      category = 'Executive';
+    }
 
+    onEventGenerated(idea.title, idea.description, category, 100);
+    setIdeas(prev => prev.filter(i => i.title !== idea.title));
+    if (onToast) {
+      onToast(`"${idea.title}" added to your event dashboard!`);
+    }
+  };
 
   return (
-    <div className="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">
-        <div className="flex items-center mb-4">
-            <LightbulbIcon />
-            <h2 className="text-2xl font-bold text-white">Event Idea Generator</h2>
+    <section id="ideas-section" className="bg-slate-900 border border-slate-800 rounded-xl p-6 lg:p-7 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="w-4 h-4 text-indigo-400" />
+            <h2 className="text-xl font-bold text-white tracking-tight">AI Event Ideation Studio</h2>
+          </div>
+          <p className="text-xs md:text-sm text-slate-400">
+            Generate executive-ready event briefs, target attendee profiles, and programming formats powered by Gemini.
+          </p>
         </div>
-        <p className="text-slate-400 mb-4">Start by entering a theme. Our AI will craft event profiles for you to add and customize.</p>
-      <div className="flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          value={theme}
-          onChange={(e) => setTheme(e.target.value)}
-          placeholder="e.g., 'Sustainability', 'Retro Gaming', 'Space Exploration'"
-          className="flex-grow w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 placeholder-slate-400"
-          onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-        />
+
+        {/* Quick Inspiration Prompts */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs text-slate-500 mr-1 flex items-center gap-1">
+            <Lightbulb className="w-3 h-3 text-amber-400" />
+            <span>Try:</span>
+          </span>
+          {INSPIRATION_THEMES.slice(0, 3).map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleGenerate(item.label)}
+              disabled={isLoading}
+              className="text-xs px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition-colors whitespace-nowrap"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Input Group */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-grow">
+          <input
+            type="text"
+            value={theme}
+            onChange={(e) => setTheme(e.target.value)}
+            placeholder="Enter an industry, topic, or theme (e.g. 'Enterprise Autonomous Agents', 'Sustainable Packaging Summit')..."
+            className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700/80 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
+            onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+          />
+        </div>
         <button
-          onClick={handleGenerate}
+          onClick={() => handleGenerate()}
           disabled={isLoading || !theme.trim()}
-          className="flex items-center justify-center bg-slate-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 disabled:bg-slate-500/50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-2.5 px-6 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
         >
-          {isLoading ? <LoadingSpinner size="6"/> : 'Generate Ideas'}
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Generating...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              <span>Generate Concepts</span>
+            </>
+          )}
         </button>
       </div>
 
+      {/* Generated Concepts Cards */}
       {ideas.length > 0 && (
-        <div className="mt-6 space-y-4">
-            <h3 className="font-semibold text-lg text-white">Generated Ideas:</h3>
+        <div className="mt-6 pt-5 border-t border-slate-800/80 space-y-4 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-200">
+              Generated Event Proposals <span className="text-xs text-slate-500 font-mono">({ideas.length})</span>
+            </h3>
+            <span className="text-xs text-slate-400">Click to add any concept to your active dashboard</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {ideas.map((idea, index) => (
-                <div key={index} className="bg-slate-700 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex-grow">
-                        <p className="font-bold text-white">{idea.title}</p>
-                        <BulletPointDescription description={idea.description} className="text-sm text-slate-300 mt-2" />
-                    </div>
-                    <button 
-                        onClick={() => handleAddEvent(idea)}
-                        className="bg-green-600 text-white text-sm font-semibold py-1 px-3 rounded-full hover:bg-green-700 transition-colors whitespace-nowrap"
-                    >
-                        + Add to Dashboard
-                    </button>
+              <div 
+                key={index} 
+                className="bg-slate-950 border border-slate-800/90 hover:border-slate-700 rounded-lg p-5 flex flex-col justify-between transition-colors shadow-sm"
+              >
+                <div>
+                  <h4 className="font-bold text-white text-base mb-2">{idea.title}</h4>
+                  <div className="text-xs text-slate-300/90 whitespace-pre-line leading-relaxed mb-4 max-h-48 overflow-y-auto pr-1">
+                    {idea.description}
+                  </div>
                 </div>
+
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Includes auto-configured agenda & logistics</span>
+                  <button
+                    onClick={() => handleAddEvent(idea)}
+                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-1.5 px-3.5 rounded-md transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add to Dashboard</span>
+                  </button>
+                </div>
+              </div>
             ))}
+          </div>
         </div>
       )}
-    </div>
+    </section>
   );
 };

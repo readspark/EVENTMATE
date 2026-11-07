@@ -1,106 +1,176 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { MessageSquare, X, Send, Bot, Copy, Check, Sparkles, Loader2 } from 'lucide-react';
 import type { ChatMessage, Event } from '../types';
 import { getChatbotResponse } from '../services/geminiService';
 
 interface ChatbotProps {
   availableEvents: Event[];
+  onToast?: (message: string) => void;
 }
 
-const ChatIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-    </svg>
-);
-
-const CloseIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-);
-
-const SendIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-    </svg>
-);
-
-export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents }) => {
+export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 1, text: "Hello! I'm EventMate, your AI planning assistant. Ask me for theme ideas, marketing tips, or scheduling advice!", sender: 'bot' }
+    { 
+      id: 1, 
+      text: "Hello! I'm your EventMate planning partner. I have full context on your events. Ask me for venue budgeting advice, speaker recommendations, run-of-show adjustments, or attendee communication strategies.", 
+      sender: 'bot' 
+    }
   ]);
   const [userInput, setUserInput] = useState('');
+  const [copiedId, setCopiedId] = useState<number | null>(null);
   const chatboxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (chatboxRef.current) {
       chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isOpen]);
 
-  const handleSendMessage = async () => {
-    if (!userInput.trim()) return;
+  const handleSendMessage = async (textToSend?: string) => {
+    const text = (textToSend || userInput).trim();
+    if (!text) return;
 
-    const newUserMessage: ChatMessage = { id: Date.now(), text: userInput, sender: 'user' };
+    const newUserMessage: ChatMessage = { id: Date.now(), text, sender: 'user' };
     const loadingBotMessage: ChatMessage = { id: Date.now() + 1, text: "...", sender: 'bot', isLoading: true };
 
     setMessages(prev => [...prev, newUserMessage, loadingBotMessage]);
     setUserInput('');
 
     const history = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
-    const botResponseText = await getChatbotResponse(history, userInput, availableEvents);
-    
-    const newBotMessage: ChatMessage = { id: Date.now() + 1, text: botResponseText, sender: 'bot' };
-    
+    const botResponseText = await getChatbotResponse(history, text, availableEvents);
+
+    const newBotMessage: ChatMessage = { id: Date.now() + 2, text: botResponseText, sender: 'bot' };
+
     setMessages(prev => {
-        const newMessages = prev.filter(m => !m.isLoading);
-        return [...newMessages, newBotMessage];
+      const filtered = prev.filter(m => !m.isLoading);
+      return [...filtered, newBotMessage];
     });
   };
+
+  const handleCopyMessage = (id: number, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+    if (onToast) onToast('Assistant response copied to clipboard');
+  };
+
+  const QUICK_PROMPTS = [
+    "Suggest 3 interactive icebreakers",
+    "How should I budget catering for 250 people?",
+    "Tips for maximizing workshop attendance"
+  ];
 
   return (
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 bg-slate-800 text-white p-4 rounded-full shadow-lg hover:bg-slate-700 transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+        className="fixed bottom-6 right-6 z-40 bg-indigo-600 hover:bg-indigo-500 text-white p-3.5 rounded-full shadow-xl hover:shadow-indigo-500/20 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        aria-label="Open AI Planning Assistant"
+        title="Open EventMate AI Assistant"
       >
-        <ChatIcon />
+        <div className="relative">
+          <MessageSquare className="w-6 h-6" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-indigo-600" />
+        </div>
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-full max-w-sm h-[60vh] bg-slate-900 border border-slate-700 rounded-xl shadow-2xl flex flex-col transition-all duration-300 ease-in-out">
-          <div className="p-4 bg-slate-800 text-white flex justify-between items-center rounded-t-xl">
-            <h3 className="font-bold text-lg">EventMate Assistant</h3>
-            <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-200">
-              <CloseIcon />
+        <div className="fixed bottom-20 right-6 z-50 w-full max-w-sm sm:max-w-md h-[560px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+          {/* Header */}
+          <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white leading-none">EventMate AI Partner</h3>
+                <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>Grounded with {availableEvents.length} active events</span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
             </button>
           </div>
-          <div ref={chatboxRef} className="flex-grow p-4 space-y-4 overflow-y-auto">
+
+          {/* Quick Prompts */}
+          <div className="px-3 py-2 bg-slate-950/50 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar">
+            <Sparkles className="w-3 h-3 text-indigo-400 shrink-0" />
+            {QUICK_PROMPTS.map((prompt, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSendMessage(prompt)}
+                className="whitespace-nowrap px-2.5 py-1 rounded bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/50 transition-colors"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          {/* Chat Messages */}
+          <div ref={chatboxRef} className="flex-grow p-4 space-y-3.5 overflow-y-auto">
             {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`rounded-lg px-4 py-2 max-w-[80%] ${msg.sender === 'user' ? 'bg-slate-700 text-white' : 'bg-slate-600 text-white'}`}>
+              <div
+                key={msg.id}
+                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`relative group rounded-xl px-4 py-2.5 max-w-[85%] text-xs leading-relaxed ${
+                    msg.sender === 'user'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-slate-800/90 text-slate-200 border border-slate-700/60 shadow-sm'
+                  }`}
+                >
                   {msg.isLoading ? (
-                    <div className="flex items-center justify-center space-x-1">
-                        <span className="h-1.5 w-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                        <span className="h-1.5 w-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                        <span className="h-1.5 w-1.5 bg-gray-300 rounded-full animate-bounce"></span>
+                    <div className="flex items-center gap-2 py-1">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                      <span className="text-slate-400 text-xs">Thinking...</span>
                     </div>
-                  ) : msg.text}
+                  ) : (
+                    <>
+                      <div className="whitespace-pre-line font-sans">{msg.text}</div>
+                      {msg.sender === 'bot' && (
+                        <button
+                          onClick={() => handleCopyMessage(msg.id, msg.text)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2 right-2 p-1 bg-slate-900 border border-slate-700 rounded text-slate-400 hover:text-white"
+                          title="Copy response"
+                        >
+                          {copiedId === msg.id ? (
+                            <Check className="w-3 h-3 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             ))}
           </div>
-          <div className="p-4 border-t border-slate-700 flex items-center">
+
+          {/* Input Footer */}
+          <div className="p-3 bg-slate-950 border-t border-slate-800 flex items-center gap-2">
             <input
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask a question..."
-              className="flex-grow px-3 py-2 border border-slate-700 bg-slate-700 text-white rounded-l-lg focus:outline-none focus:ring-1 focus:ring-slate-500 placeholder-gray-400"
+              placeholder="Ask for planning advice or suggestions..."
+              className="flex-grow px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
-            <button onClick={handleSendMessage} className="bg-slate-800 text-white p-2 rounded-r-lg hover:bg-slate-700">
-              <SendIcon />
+            <button
+              onClick={() => handleSendMessage()}
+              disabled={!userInput.trim()}
+              className="p-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-lg transition-colors shrink-0"
+            >
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </div>

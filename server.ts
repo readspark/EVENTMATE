@@ -6,6 +6,8 @@ import healthHandler from "./api/health";
 import generateIdeasHandler from "./api/gemini/generate-ideas";
 import reminderEmailHandler from "./api/gemini/reminder-email";
 import chatbotHandler from "./api/gemini/chatbot";
+import generateAgendaHandler from "./api/gemini/generate-agenda";
+import generateMarketingHandler from "./api/gemini/generate-marketing";
 
 const PORT = 3000;
 
@@ -18,6 +20,8 @@ async function startServer() {
   app.post("/api/gemini/generate-ideas", generateIdeasHandler);
   app.post("/api/gemini/reminder-email", reminderEmailHandler);
   app.post("/api/gemini/chatbot", chatbotHandler);
+  app.post("/api/gemini/generate-agenda", generateAgendaHandler);
+  app.post("/api/gemini/generate-marketing", generateMarketingHandler);
 
   // Vite middleware in development vs static file serving in production
   if (process.env.NODE_ENV !== "production") {
