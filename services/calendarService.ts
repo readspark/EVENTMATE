@@ -1,4 +1,5 @@
 import type { Event } from '../types';
+import { parseIndianDate } from '../utils/dateUtils';
 
 /**
  * Generates and triggers download of a standardized RFC 5545 .ics calendar file.
@@ -6,8 +7,8 @@ import type { Event } from '../types';
 export const downloadIcsCalendarFile = (event: Event): boolean => {
   try {
     const formatIcsDate = (dateStr: string, timeStr?: string): string => {
-      // Default to today if date is missing or invalid
-      let d = new Date(dateStr);
+      // Parse Indian (DD/MM/YYYY) or ISO date
+      let d = parseIndianDate(dateStr);
       if (isNaN(d.getTime())) {
         d = new Date();
       }

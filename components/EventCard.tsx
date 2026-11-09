@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Video, CalendarPlus, Trash2, ArrowRight } from 'lucide-react';
 import type { Event } from '../types';
 import { downloadIcsCalendarFile } from '../services/calendarService';
+import { formatIndianDate } from '../utils/dateUtils';
 
 interface EventCardProps {
   event: Event;
@@ -57,7 +58,7 @@ export const EventCard: React.FC<EventCardProps> = ({
           <span aria-hidden="true" className="text-slate-600">·</span>
           <span>{event.status || 'Upcoming'}</span>
           <span aria-hidden="true" className="text-slate-600">·</span>
-          <span className="font-mono tabular-nums">{event.date || 'TBD'}</span>
+          <span className="font-mono tabular-nums">{formatIndianDate(event.date)}</span>
         </div>
 
         {/* Title */}
@@ -115,7 +116,7 @@ export const EventCard: React.FC<EventCardProps> = ({
       <div className="flex items-center gap-2 pt-3 border-t border-slate-800/80">
         <button
           onClick={() => onEditClick(event)}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700/60"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-full bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700/60"
         >
           <span>Manage</span>
           <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
@@ -123,7 +124,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         <button
           onClick={handleCalendarDownload}
-          className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-colors"
+          className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-colors"
           title="Download .ics Calendar Invite"
           aria-label="Download calendar invite"
         >
@@ -132,7 +133,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         <button
           onClick={handleDelete}
-          className={`px-2.5 py-2 text-xs font-semibold rounded-lg transition-colors border ${
+          className={`px-3 py-2 text-xs font-semibold rounded-full transition-colors border ${
             isConfirmingDelete
               ? 'bg-rose-900/60 text-rose-200 border-rose-700 hover:bg-rose-900'
               : 'text-slate-400 hover:text-rose-400 bg-slate-800/60 hover:bg-slate-800 border-slate-700/60'

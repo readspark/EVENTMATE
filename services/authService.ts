@@ -23,9 +23,20 @@ provider.setCustomParameters({
   prompt: 'select_account'
 });
 
-// Cache access token in memory (never in localStorage)
+// Cache access token in memory
 let cachedAccessToken: string | null = null;
 let isSigningIn = false;
+
+/**
+ * Checks if the current page is running inside an iframe (e.g., AI Studio web preview)
+ */
+export const isRunningInIframe = (): boolean => {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+};
 
 /**
  * Initialize auth listener and catch redirect results if any.
@@ -34,7 +45,7 @@ export const initAuth = (
   onAuthSuccess: (user: User, token?: string) => void,
   onAuthFailure: () => void
 ) => {
-  // Check for redirect result on load
+  // Check for redirect result on load (runs when returning from redirect auth)
   getRedirectResult(auth)
     .then((result) => {
       if (result?.user) {
@@ -51,7 +62,7 @@ export const initAuth = (
       }
     })
     .catch((err) => {
-      console.warn("Redirect auth check note:", err);
+      console.warn("Redirect auth check notice:", err);
     });
 
   // Listen to standard Firebase auth state changes
@@ -73,7 +84,29 @@ export const initAuth = (
 };
 
 /**
- * Sign in using Google. Tries popup first; if popups are blocked, falls back to redirect.
+ * Translate Firebase Auth errors to clear, actionable guidance
+ */
+export const formatAuthErrorMessage = (err: any): string => {
+  if (!err) return 'An unknown error occurred during sign in.';
+  const code = err.code || '';
+  
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Sign in was cancelled (popup window was closed).';
+  }
+  if (code === 'auth/popup-blocked') {
+    return 'The sign-in popup was blocked by your browser. Please allow popups or use the direct sign in option below.';
+  }
+  if (code === 'auth/unauthorized-domain') {
+    return 'This preview domain is pending authorization in Firebase Console. You can sign in using your profile below or open in a standalone tab.';
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'Network connection issue. Please verify internet access and try again.';
+  }
+  return err.message || 'Unable to complete sign-in. Please try again.';
+};
+
+/**
+ * Sign in using Google via popup.
  */
 export const signInWithGoogle = async (): Promise<{ user: User; accessToken?: string }> => {
   isSigningIn = true;
@@ -91,28 +124,31 @@ export const signInWithGoogle = async (): Promise<{ user: User; accessToken?: st
     };
 
     return { user: appUser, accessToken: cachedAccessToken || undefined };
-  } catch (error: any) {
-    console.error("Popup sign-in error:", error);
-    // If popup was blocked or closed, try redirect
-    if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-      await signInWithRedirect(auth, provider);
-    }
-    throw error;
   } finally {
     isSigningIn = false;
   }
 };
 
 /**
- * Direct redirect to Google web sign in.
+ * Web redirect to Google sign-in.
+ * If in an iframe, navigates the top window or launches the standalone window
+ * because Google blocks loading inside iframes (X-Frame-Options: DENY).
  */
 export const redirectToGoogleSignIn = async () => {
   isSigningIn = true;
   try {
+    if (isRunningInIframe()) {
+      // In an iframe, accounts.google.com sends X-Frame-Options: DENY.
+      // Launching at top level or in standalone window ensures Google's web sign-in renders.
+      window.open(window.location.href, '_blank');
+      return;
+    }
     await signInWithRedirect(auth, provider);
   } catch (error) {
     console.error("Redirect sign-in error:", error);
     throw error;
+  } finally {
+    isSigningIn = false;
   }
 };
 

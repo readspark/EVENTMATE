@@ -69,12 +69,68 @@ ${plannerName || 'The Event Organizing Team'}`
   }
 };
 
-export const generateAgenda = async (eventTitle: string, eventDescription: string, durationHours: number = 4): Promise<AgendaItem[]> => {
+export interface GenerateAgendaOptions {
+  title: string;
+  description?: string;
+  time?: string;
+  category?: string;
+  location?: string;
+  isVirtual?: boolean;
+  durationHours?: number;
+}
+
+function parseTimeToMinutes(timeStr: string): number {
+  const match = timeStr.trim().match(/(\d{1,2}):?(\d{2})?\s*(AM|PM)?/i);
+  if (!match) return 9 * 60;
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  const meridian = match[3]?.toUpperCase();
+
+  if (meridian === 'PM' && hours < 12) hours += 12;
+  if (meridian === 'AM' && hours === 12) hours = 0;
+  return hours * 60 + minutes;
+}
+
+function formatMinutesToTime(totalMinutes: number): string {
+  const normalized = Math.max(0, totalMinutes % (24 * 60));
+  let hours = Math.floor(normalized / 60);
+  const minutes = normalized % 60;
+  const meridian = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+  const hStr = hours < 10 ? `0${hours}` : `${hours}`;
+  const mStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  return `${hStr}:${mStr} ${meridian}`;
+}
+
+export const generateAgenda = async (
+  optionsOrTitle: string | GenerateAgendaOptions,
+  legacyDescription?: string,
+  legacyDurationHours: number = 4
+): Promise<AgendaItem[]> => {
+  const options: GenerateAgendaOptions = typeof optionsOrTitle === 'string'
+    ? {
+        title: optionsOrTitle,
+        description: legacyDescription || '',
+        durationHours: legacyDurationHours,
+      }
+    : optionsOrTitle;
+
+  const { title, description = '', time = '', category = 'Conference', location = '', isVirtual = false, durationHours = 4 } = options;
+
   try {
     const response = await fetch('/api/gemini/generate-agenda', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ eventTitle, eventDescription, durationHours }),
+      body: JSON.stringify({
+        eventTitle: title,
+        eventDescription: description,
+        eventTime: time,
+        category,
+        location,
+        isVirtual,
+        durationHours,
+      }),
     });
 
     if (!response.ok) {
@@ -92,15 +148,50 @@ export const generateAgenda = async (eventTitle: string, eventDescription: strin
     }));
   } catch (error) {
     console.error("Error generating agenda:", error);
-    // Reliable fallback agenda
-    return [
-      { id: `ag-${Date.now()}-1`, time: "09:00 AM", title: "Registration & Welcome Reception", speakerOrLead: "Host Committee", notes: "Check-in and morning refreshments" },
-      { id: `ag-${Date.now()}-2`, time: "09:45 AM", title: `Opening Keynote: Future of ${eventTitle}`, speakerOrLead: "Guest Keynote Speaker", notes: "Main Stage" },
-      { id: `ag-${Date.now()}-3`, time: "11:00 AM", title: "Deep Dive Panel & Case Studies", speakerOrLead: "Expert Panelists", notes: "Q&A via audience app" },
-      { id: `ag-${Date.now()}-4`, time: "12:30 PM", title: "Curated Lunch & Executive Networking", speakerOrLead: "All Participants", notes: "Dining Courtyard" },
-      { id: `ag-${Date.now()}-5`, time: "02:00 PM", title: "Interactive Workshop Breakouts", speakerOrLead: "Session Leads", notes: "Rooms A, B, and C" },
-      { id: `ag-${Date.now()}-6`, time: "03:45 PM", title: "Synthesis, Next Steps & Closing Toast", speakerOrLead: "Organizing Team", notes: "Main Stage" }
-    ];
+    
+    // Parse scheduled start and end from time string if available
+    let startMin = 9 * 60; // 09:00 AM
+    let endMin = 13 * 60;  // 01:00 PM
+    if (time.includes('-')) {
+      const parts = time.split('-');
+      if (parts[0]) startMin = parseTimeToMinutes(parts[0]);
+      if (parts[1]) endMin = parseTimeToMinutes(parts[1]);
+      if (endMin <= startMin) endMin = startMin + 240;
+    } else if (time) {
+      startMin = parseTimeToMinutes(time);
+      endMin = startMin + 240;
+    }
+
+    const totalSpan = endMin - startMin;
+    const slotCount = category === 'Networking' ? 4 : 5;
+    const step = Math.floor(totalSpan / slotCount);
+
+    const timeSlots = Array.from({ length: slotCount }, (_, i) => formatMinutesToTime(startMin + (i * step)));
+
+    if (category === 'Networking') {
+      return [
+        { id: `ag-${Date.now()}-1`, time: timeSlots[0], title: `Welcome Cocktails & Attendee Check-In`, speakerOrLead: "Event Concierge", notes: isVirtual ? "Virtual lounge lobby" : "Welcome foyer" },
+        { id: `ag-${Date.now()}-2`, time: timeSlots[1], title: `Lightning Spotlight: Introductions & Thematic Focus on ${title}`, speakerOrLead: "Featured Hosts", notes: "Main Stage / Spotlight Area" },
+        { id: `ag-${Date.now()}-3`, time: timeSlots[2], title: `Curated Peer Networking & Strategic Discussion`, speakerOrLead: "All Attendees", notes: "Open networking lounge" },
+        { id: `ag-${Date.now()}-4`, time: timeSlots[3], title: `Closing Toast & Community Next Steps`, speakerOrLead: "Organizing Committee", notes: "Wrap-up and contact exchange" }
+      ];
+    } else if (category === 'Workshop') {
+      return [
+        { id: `ag-${Date.now()}-1`, time: timeSlots[0], title: `Orientation & Architecture Setup: ${title}`, speakerOrLead: "Workshop Director", notes: isVirtual ? "Repository setup & audio check" : "Lab classroom entrance" },
+        { id: `ag-${Date.now()}-2`, time: timeSlots[1], title: `Hands-On Lab: Core Practical Patterns in ${title}`, speakerOrLead: "Technical Lead", notes: "Interactive exercise part 1" },
+        { id: `ag-${Date.now()}-3`, time: timeSlots[2], title: `Implementation Teardown & Live Group Review`, speakerOrLead: "Staff Specialist", notes: "Breakout feedback & review" },
+        { id: `ag-${Date.now()}-4`, time: timeSlots[3], title: `Advanced Problem Solving & Practical Frameworks`, speakerOrLead: "Workshop Director", notes: "Hands-on challenge part 2" },
+        { id: `ag-${Date.now()}-5`, time: timeSlots[4], title: `Synthesis, Q&A and Distribution Package`, speakerOrLead: "Instructors", notes: "Key takeaway artifacts provided" }
+      ];
+    } else {
+      return [
+        { id: `ag-${Date.now()}-1`, time: timeSlots[0], title: `Registration & Opening Reception`, speakerOrLead: "Host Committee", notes: isVirtual ? "Digital lobby check-in" : "Main registration desk" },
+        { id: `ag-${Date.now()}-2`, time: timeSlots[1], title: `Keynote: The Horizon of ${title}`, speakerOrLead: "Keynote Guest", notes: "Main Stage Auditorium" },
+        { id: `ag-${Date.now()}-3`, time: timeSlots[2], title: `Deep Dive Panel: Tactical Execution & Case Studies`, speakerOrLead: "Distinguished Panelists", notes: "Audience Q&A enabled" },
+        { id: `ag-${Date.now()}-4`, time: timeSlots[3], title: `Interactive Working Session & Specialized Breakouts`, speakerOrLead: "Session Facilitators", notes: "Breakout Rooms & Discussions" },
+        { id: `ag-${Date.now()}-5`, time: timeSlots[4], title: `Synthesis, Action Items & Closing Remarks`, speakerOrLead: "Organizing Team", notes: "Main Stage wrap-up" }
+      ];
+    }
   }
 };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar, MapPin, ArrowRight } from 'lucide-react';
 import type { Event } from '../types';
+import { formatIndianDate } from '../utils/dateUtils';
 
 interface MyEventsModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ export const MyEventsModal: React.FC<MyEventsModalProps> = ({ isOpen, onClose, e
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+            className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -39,14 +40,14 @@ export const MyEventsModal: React.FC<MyEventsModalProps> = ({ isOpen, onClose, e
                     onClose();
                   }
                 }}
-                className="bg-slate-950/80 border border-slate-800 hover:border-slate-700 p-3.5 rounded-lg flex items-center justify-between gap-3 cursor-pointer group transition-colors"
+                className="bg-slate-950/80 border border-slate-800 hover:border-slate-700 p-3.5 rounded-xl flex items-center justify-between gap-3 cursor-pointer group transition-colors"
               >
                 <div className="min-w-0">
                   <div className="font-semibold text-white text-sm truncate group-hover:text-indigo-300 transition-colors">
                     {event.title}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-                    <span className="font-mono tabular-nums">{event.date}</span>
+                    <span className="font-mono tabular-nums">{formatIndianDate(event.date)}</span>
                     <span aria-hidden="true" className="text-slate-600">·</span>
                     <span className="truncate">{event.location}</span>
                     <span aria-hidden="true" className="text-slate-600">·</span>
@@ -61,7 +62,7 @@ export const MyEventsModal: React.FC<MyEventsModalProps> = ({ isOpen, onClose, e
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-xs text-slate-400 border border-dashed border-slate-800 rounded-lg">
+          <div className="text-center py-12 text-xs text-slate-400 border border-dashed border-slate-800 rounded-xl">
             No events planned yet. Use the ideation tool or create your first event!
           </div>
         )}
@@ -69,7 +70,7 @@ export const MyEventsModal: React.FC<MyEventsModalProps> = ({ isOpen, onClose, e
         <div className="pt-4 mt-4 border-t border-slate-800">
           <button
             onClick={onClose}
-            className="w-full py-2 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
+            className="w-full py-2.5 px-4 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
           >
             Close
           </button>

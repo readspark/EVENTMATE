@@ -27,20 +27,26 @@ export default async function handler(req: any, res: any) {
 
     const response = await ai.models.generateContent({
       model: "gemini-3.6-flash",
-      contents: `You are EventMate, an AI assistant for an event planner.
-      Your goal is to help the user plan and organize their events. You can suggest themes, provide marketing tips, help with scheduling, or answer questions about the events they are currently planning.
-      Be creative, helpful, and concise.
+      contents: `You are EventMate, a direct, executive event planning assistant.
 
-      Here are the events the user is currently planning:
-      ${JSON.stringify(events || [], null, 2)}
+INSTRUCTION: Answer in direct, definite, clear words.
+- Provide definite, authoritative answers immediately without any preamble.
+- Do NOT use filler phrases or conversational pleasantries (NO "Sure!", "I'd be happy to help", "Certainly", "Great question", "Hello there").
+- Give exact numbers, specific recommendations, and concrete steps.
+- Speak in definite, confident statements. Avoid vague qualifiers like "maybe", "you might consider", or "it depends". State the best choice directly.
+- Keep responses concise, high-signal, and easy to execute.
 
-      Here is the conversation history:
-      ${history || ''}
+User's active events portfolio:
+${JSON.stringify(events || [], null, 2)}
 
-      Answer the following user question: "${question}"`,
+Prior conversation:
+${history || ''}
+
+User's question:
+"${question}"`,
     });
 
-    return res.status(200).json({ text: response.text || "I'm sorry, I couldn't process that request." });
+    return res.status(200).json({ text: response.text || "No response generated." });
   } catch (error: any) {
     console.error("Error getting chatbot response:", error);
     return res.status(500).json({ error: error.message || "Failed to get chatbot response" });

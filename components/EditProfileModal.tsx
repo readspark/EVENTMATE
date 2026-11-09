@@ -41,24 +41,26 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-w-sm w-full p-6 relative">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-[#020204] border border-[#1F1F24] rounded-2xl shadow-2xl shadow-black/80 max-w-sm w-full p-6 relative">
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#1F1F24] mb-4">
           <div className="flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-bold text-white tracking-tight">Edit Planner Profile</h2>
+            <div className="w-7 h-7 rounded-lg bg-[#060608] border border-[#1F1F24] flex items-center justify-center text-[#A78BFA]">
+              <UserIcon className="w-3.5 h-3.5" />
+            </div>
+            <h2 className="text-sm font-semibold text-white tracking-tight">Edit Planner Profile</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+            className="text-[#8E8E93] hover:text-white p-1 rounded-full hover:bg-[#141418] transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label htmlFor="edit-name" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label htmlFor="edit-name" className="block text-[11px] font-medium text-[#8E8E93] mb-1.5">
               Full Name
             </label>
             <input
@@ -66,13 +68,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
               id="edit-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#060608] border border-[#1F1F24] hover:border-[#33333D] rounded-lg text-white text-xs placeholder-[#52525B] focus:outline-none focus:border-[#7C3AED] transition-colors"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="edit-email" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label htmlFor="edit-email" className="block text-[11px] font-medium text-[#8E8E93] mb-1.5">
               Work Email
             </label>
             <input
@@ -80,13 +82,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
               id="edit-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#060608] border border-[#1F1F24] hover:border-[#33333D] rounded-lg text-white text-xs placeholder-[#52525B] focus:outline-none focus:border-[#7C3AED] transition-colors"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="edit-role" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label htmlFor="edit-role" className="block text-[11px] font-medium text-[#8E8E93] mb-1.5">
               Role / Title
             </label>
             <input
@@ -94,15 +96,15 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
               id="edit-role"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#060608] border border-[#1F1F24] hover:border-[#33333D] rounded-lg text-white text-xs placeholder-[#52525B] focus:outline-none focus:border-[#7C3AED] transition-colors"
             />
           </div>
 
-          {error && <p className="text-rose-400 text-xs">{error}</p>}
+          {error && <p className="text-[#EF4444] text-xs">{error}</p>}
 
           <button
             type="submit"
-            className="w-full py-2.5 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors mt-2"
+            className="w-full py-2.5 px-4 rounded-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-medium transition-colors mt-2 shadow-sm"
           >
             Save Changes
           </button>

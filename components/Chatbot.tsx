@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, Copy, Check, Sparkles, Loader2 } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Copy, Check, Loader2 } from 'lucide-react';
 import type { ChatMessage, Event } from '../types';
 import { getChatbotResponse } from '../services/geminiService';
 
@@ -13,7 +13,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
   const [messages, setMessages] = useState<ChatMessage[]>([
     { 
       id: 1, 
-      text: "Hello! I'm your EventMate planning partner. I have full context on your events. Ask me for venue budgeting advice, speaker recommendations, run-of-show adjustments, or attendee communication strategies.", 
+      text: "EventMate assistant ready. Ask any event question for direct, definite planning guidance.", 
       sender: 'bot' 
     }
   ]);
@@ -55,82 +55,58 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
     if (onToast) onToast('Assistant response copied to clipboard');
   };
 
-  const QUICK_PROMPTS = [
-    "Suggest 3 interactive icebreakers",
-    "How should I budget catering for 250 people?",
-    "Tips for maximizing workshop attendance"
-  ];
-
   return (
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-40 bg-indigo-600 hover:bg-indigo-500 text-white p-3.5 rounded-full shadow-xl hover:shadow-indigo-500/20 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        className="fixed bottom-6 right-6 z-40 bg-[#7C3AED] hover:bg-[#6D28D9] text-white w-12 h-12 rounded-full shadow-lg hover:shadow-[#7C3AED]/20 flex items-center justify-center transition-all focus:outline-none"
         aria-label="Open AI Planning Assistant"
-        title="Open EventMate AI Assistant"
+        title="EventMate AI Assistant"
       >
-        <div className="relative">
-          <MessageSquare className="w-6 h-6" />
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-indigo-600" />
-        </div>
+        <MessageSquare className="w-5 h-5" />
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-20 right-6 z-50 w-full max-w-sm sm:max-w-md h-[560px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-20 right-6 z-50 w-full max-w-sm sm:max-w-md h-[500px] bg-[#020204] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
-          <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+          <div className="p-3.5 bg-[#060608] border-b border-[#1F1F24] flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
-                <Bot className="w-4 h-4" />
+              <div className="w-6 h-6 rounded-full bg-[#181126] border border-[#7C3AED]/30 flex items-center justify-center text-[#A78BFA]">
+                <Bot className="w-3.5 h-3.5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white leading-none">EventMate AI Partner</h3>
-                <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  <span>Grounded with {availableEvents.length} active events</span>
+                <h3 className="text-xs font-semibold text-white leading-none">EventMate AI Partner</h3>
+                <div className="text-[11px] text-[#8E8E93] mt-1">
+                  Direct Definite Planning Intelligence
                 </div>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+              className="text-[#8E8E93] hover:text-white p-1 rounded-full hover:bg-[#121215] transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Quick Prompts */}
-          <div className="px-3 py-2 bg-slate-950/50 border-b border-slate-800/80 flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar">
-            <Sparkles className="w-3 h-3 text-indigo-400 shrink-0" />
-            {QUICK_PROMPTS.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(prompt)}
-                className="whitespace-nowrap px-2.5 py-1 rounded bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/50 transition-colors"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-
           {/* Chat Messages */}
-          <div ref={chatboxRef} className="flex-grow p-4 space-y-3.5 overflow-y-auto">
+          <div ref={chatboxRef} className="flex-grow p-4 space-y-3 overflow-y-auto bg-[#020204]">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`relative group rounded-xl px-4 py-2.5 max-w-[85%] text-xs leading-relaxed ${
+                  className={`relative group rounded-2xl px-3.5 py-2.5 max-w-[85%] text-xs leading-relaxed ${
                     msg.sender === 'user'
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-slate-800/90 text-slate-200 border border-slate-700/60 shadow-sm'
+                      ? 'bg-[#7C3AED] text-white shadow-xs'
+                      : 'bg-[#0A0A0E] text-[#E4E4E7] border border-[#1F1F24] shadow-xs'
                   }`}
                 >
                   {msg.isLoading ? (
-                    <div className="flex items-center gap-2 py-1">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                      <span className="text-slate-400 text-xs">Thinking...</span>
+                    <div className="flex items-center gap-2 py-0.5">
+                      <Loader2 className="w-3 h-3 animate-spin text-[#A78BFA]" />
+                      <span className="text-[#8E8E93] text-xs">Evaluating...</span>
                     </div>
                   ) : (
                     <>
@@ -138,11 +114,11 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
                       {msg.sender === 'bot' && (
                         <button
                           onClick={() => handleCopyMessage(msg.id, msg.text)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2 right-2 p-1 bg-slate-900 border border-slate-700 rounded text-slate-400 hover:text-white"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2 right-2 p-1 bg-black border border-[#1F1F24] rounded-full text-[#8E8E93] hover:text-[#A78BFA]"
                           title="Copy response"
                         >
                           {copiedId === msg.id ? (
-                            <Check className="w-3 h-3 text-emerald-400" />
+                            <Check className="w-3 h-3 text-[#10B981]" />
                           ) : (
                             <Copy className="w-3 h-3" />
                           )}
@@ -156,21 +132,22 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
           </div>
 
           {/* Input Footer */}
-          <div className="p-3 bg-slate-950 border-t border-slate-800 flex items-center gap-2">
+          <div className="p-3 bg-[#060608] border-t border-[#1F1F24] flex items-center gap-2">
             <input
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask for planning advice or suggestions..."
-              className="flex-grow px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              placeholder="Ask a definite question..."
+              className="flex-grow px-3.5 py-2 bg-[#0A0A0E] border border-[#1F1F24] rounded-full text-xs text-white placeholder-[#71717A] focus:outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
             />
             <button
               onClick={() => handleSendMessage()}
               disabled={!userInput.trim()}
-              className="p-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white rounded-lg transition-colors shrink-0"
+              className="p-2 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 text-white rounded-full transition-all shrink-0"
+              title="Send message"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

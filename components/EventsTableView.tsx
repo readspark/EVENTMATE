@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, MapPin, Users, Video, CalendarPlus, Trash2, ArrowRight } from 'lucide-react';
 import type { Event } from '../types';
 import { downloadIcsCalendarFile } from '../services/calendarService';
+import { formatIndianDate } from '../utils/dateUtils';
 
 interface EventsTableViewProps {
   events: Event[];
@@ -51,7 +52,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                 </td>
 
                 <td className="py-3.5 px-4 text-xs font-mono tabular-nums text-slate-300 whitespace-nowrap">
-                  <div>{event.date || 'TBD'}</div>
+                  <div>{formatIndianDate(event.date)}</div>
                   <div className="text-slate-500">{event.time || 'Schedule pending'}</div>
                 </td>
 
@@ -89,7 +90,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                   <div className="flex items-center justify-end gap-1.5">
                     <button
                       onClick={() => onEditClick(event)}
-                      className="px-2.5 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1"
+                      className="px-3 py-1.5 text-xs font-semibold rounded-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1"
                       title="Manage event"
                     >
                       <span>Manage</span>
@@ -101,7 +102,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                         const success = downloadIcsCalendarFile(event);
                         if (success && onToast) onToast(`Calendar invite (.ics) downloaded for "${event.title}"`);
                       }}
-                      className="p-1.5 text-slate-400 hover:text-white rounded bg-slate-800 hover:bg-slate-700 border border-slate-700"
+                      className="p-1.5 text-slate-400 hover:text-white rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700"
                       title="Export .ics invite"
                     >
                       <CalendarPlus className="w-3.5 h-3.5" />
@@ -114,7 +115,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                           if (onToast) onToast(`Event deleted`);
                         }
                       }}
-                      className="p-1.5 text-slate-400 hover:text-rose-400 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700"
+                      className="p-1.5 text-slate-400 hover:text-rose-400 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700"
                       title="Delete event"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Calendar, MapPin, Users, Video } from 'lucide-react';
 import type { Event, EventCategory } from '../types';
+import { normalizeToIndianDate } from '../utils/dateUtils';
 
 interface NewEventModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export const NewEventModal: React.FC<NewEventModalProps> = ({ isOpen, onClose, o
       id: Date.now(),
       title: title.trim(),
       description: description.trim() || 'Comprehensive event agenda and programming.',
-      date: date.trim(),
+      date: normalizeToIndianDate(date.trim()),
       time: time.trim(),
       location: location.trim() || (isVirtual ? 'Virtual Meeting' : 'Venue to be decided'),
       isVirtual,
@@ -53,7 +54,7 @@ export const NewEventModal: React.FC<NewEventModalProps> = ({ isOpen, onClose, o
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+            className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -110,13 +111,13 @@ export const NewEventModal: React.FC<NewEventModalProps> = ({ isOpen, onClose, o
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                Date (YYYY-MM-DD)
+                Date (DD/MM/YYYY)
               </label>
               <input
                 type="text"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                placeholder="2026-12-10"
+                placeholder="e.g. 24/11/2026"
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-sm font-mono"
                 required
               />
@@ -177,13 +178,13 @@ export const NewEventModal: React.FC<NewEventModalProps> = ({ isOpen, onClose, o
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+              className="px-4 py-2 text-xs font-semibold rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
+              className="px-6 py-2.5 text-xs font-semibold rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all"
             >
               Create Event
             </button>

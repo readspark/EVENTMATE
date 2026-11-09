@@ -44,7 +44,7 @@ Provide the output in JSON format with:
 - hashtags: Array of 3-5 relevant industry hashtags`;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.8-flash",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

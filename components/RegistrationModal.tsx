@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, Calendar, Clock, MapPin, Users, Download, CalendarPlus, 
-  Sparkles, CheckCircle2, Circle, Plus, Trash2, Copy, Check, 
-  Share2, Mail, ExternalLink, Loader2
+  CheckCircle2, Circle, Plus, Trash2, Check, 
+  Mail, ExternalLink, Loader2
 } from 'lucide-react';
 import type { Event, Registration, User, EventCategory, EventStatus, AgendaItem } from '../types';
-import { generateAgenda, generateMarketingCopy, generateReminderEmail } from '../services/geminiService';
+import { generateReminderEmail } from '../services/geminiService';
 import { downloadIcsCalendarFile } from '../services/calendarService';
 import { ReminderModal } from './ReminderModal';
+import { formatIndianDate } from '../utils/dateUtils';
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ interface RegistrationModalProps {
   onToast?: (message: string) => void;
 }
 
-type TabType = 'details' | 'attendees' | 'agenda' | 'marketing';
+type TabType = 'details' | 'attendees' | 'agenda';
 
 export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   isOpen,
@@ -44,16 +45,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
   // Agenda items state
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>(event.agenda || []);
-  const [isGeneratingAgenda, setIsGeneratingAgenda] = useState(false);
   const [newAgendaTime, setNewAgendaTime] = useState('');
   const [newAgendaTitle, setNewAgendaTitle] = useState('');
   const [newAgendaLead, setNewAgendaLead] = useState('');
-
-  // Marketing copy state
-  const [marketingChannel, setMarketingChannel] = useState<'Email' | 'LinkedIn' | 'Twitter/X'>('LinkedIn');
-  const [marketingCopy, setMarketingCopy] = useState<{ headline: string; content: string; hashtags: string[] } | null>(null);
-  const [isGeneratingMarketing, setIsGeneratingMarketing] = useState(false);
-  const [copiedMarketing, setCopiedMarketing] = useState(false);
 
   // Reminder Modal state
   const [isReminderModalOpen, setIsReminderModalOpen] = useState(false);
@@ -98,7 +92,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       name: newAttendeeName.trim(),
       email: newAttendeeEmail.trim(),
       checkedIn: false,
-      registeredAt: new Date().toISOString().split('T')[0],
+      registeredAt: formatIndianDate(new Date()),
     });
     setNewAttendeeName('');
     setNewAttendeeEmail('');
@@ -127,16 +121,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     if (success && onToast) onToast(`Downloaded .ics invite for ${formData.title}`);
   };
 
-  const handleGenerateAgenda = async () => {
-    setIsGeneratingAgenda(true);
-    const items = await generateAgenda(formData.title, formData.description, 4);
-    setAgendaItems(items);
-    const updated = { ...formData, agenda: items };
-    onSave(updated);
-    setIsGeneratingAgenda(false);
-    if (onToast) onToast(`Generated ${items.length} Run-of-Show timeline segments with AI`);
-  };
-
   const handleAddAgendaItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAgendaTitle.trim() || !newAgendaTime.trim()) return;
@@ -158,23 +142,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     const updatedAgenda = agendaItems.filter(item => item.id !== id);
     setAgendaItems(updatedAgenda);
     onSave({ ...formData, agenda: updatedAgenda });
-  };
-
-  const handleGenerateMarketing = async () => {
-    setIsGeneratingMarketing(true);
-    const result = await generateMarketingCopy(formData, marketingChannel);
-    setMarketingCopy(result);
-    setIsGeneratingMarketing(false);
-    if (onToast) onToast(`Generated ${marketingChannel} promotional copy`);
-  };
-
-  const handleCopyMarketing = () => {
-    if (!marketingCopy) return;
-    const fullText = `${marketingCopy.headline}\n\n${marketingCopy.content}\n\n${marketingCopy.hashtags.join(' ')}`;
-    navigator.clipboard.writeText(fullText);
-    setCopiedMarketing(true);
-    setTimeout(() => setCopiedMarketing(false), 2000);
-    if (onToast) onToast('Promotional copy copied to clipboard');
   };
 
   const handleOpenReminderModal = async () => {
@@ -205,7 +172,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 <span aria-hidden="true" className="text-slate-600">·</span>
                 <span>{formData.status || 'Upcoming'}</span>
                 <span aria-hidden="true" className="text-slate-600">·</span>
-                <span className="font-mono tabular-nums">{formData.date}</span>
+                <span className="font-mono tabular-nums">{formatIndianDate(formData.date)}</span>
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight leading-snug">
                 {formData.title}
@@ -213,7 +180,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+              className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
@@ -221,10 +188,10 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex items-center border-b border-slate-800 px-5 gap-6 text-sm bg-slate-900/50">
+          <div className="flex items-center border-b border-slate-800 text-sm bg-slate-900/50">
             <button
               onClick={() => setActiveTab('details')}
-              className={`py-3 font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 ${
+              className={`flex-1 text-center py-3 font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'details'
                   ? 'border-indigo-500 text-white'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -234,7 +201,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('attendees')}
-              className={`py-3 font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+              className={`flex-1 text-center py-3 font-medium transition-colors border-b-2 whitespace-nowrap flex items-center justify-center gap-1.5 ${
                 activeTab === 'attendees'
                   ? 'border-indigo-500 text-white'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -247,26 +214,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('agenda')}
-              className={`py-3 font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+              className={`flex-1 text-center py-3 font-medium transition-colors border-b-2 whitespace-nowrap flex items-center justify-center gap-1.5 ${
                 activeTab === 'agenda'
                   ? 'border-indigo-500 text-white'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <Clock className="w-3.5 h-3.5 text-indigo-400" />
               <span>Run-of-Show Agenda</span>
               <span className="text-xs font-mono tabular-nums text-slate-400">({agendaItems.length})</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('marketing')}
-              className={`py-3 font-medium transition-colors border-b-2 whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
-                activeTab === 'marketing'
-                  ? 'border-indigo-500 text-white'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Share2 className="w-3.5 h-3.5 text-indigo-400" />
-              <span>AI Promo & Copy</span>
             </button>
           </div>
 
@@ -348,7 +304,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label htmlFor="date" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                      Date (YYYY-MM-DD or readable)
+                      Date (DD/MM/YYYY)
                     </label>
                     <input
                       type="text"
@@ -356,7 +312,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       name="date"
                       value={formData.date}
                       onChange={handleChange}
-                      placeholder="e.g. 2026-11-24"
+                      placeholder="e.g. 24/11/2026"
                       className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
                     />
@@ -424,7 +380,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   <button
                     type="button"
                     onClick={handleExportIcs}
-                    className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
                   >
                     <CalendarPlus className="w-3.5 h-3.5" />
                     <span>Download .ICS Calendar Invite</span>
@@ -433,7 +389,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   <button
                     type="submit"
                     disabled={saveStatus !== 'idle'}
-                    className="flex items-center gap-2 px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
                   >
                     {saveStatus === 'saving' && <Loader2 className="w-4 h-4 animate-spin" />}
                     {saveStatus === 'saved' && <Check className="w-4 h-4 text-emerald-400" />}
@@ -459,7 +415,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <button
                       onClick={handleExportCsv}
                       disabled={!totalRegistrations}
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 disabled:opacity-50 transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 disabled:opacity-50 transition-colors"
                       title="Download attendee roster CSV"
                     >
                       <Download className="w-3.5 h-3.5" />
@@ -468,7 +424,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <button
                       onClick={handleOpenReminderModal}
                       disabled={!totalRegistrations || isGeneratingReminder}
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition-colors"
                     >
                       {isGeneratingReminder ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
                       <span>Send Reminders</span>
@@ -506,7 +462,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </div>
                   <button
                     type="submit"
-                    className="flex items-center justify-center gap-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition-colors h-[38px]"
+                    className="flex items-center justify-center gap-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-full transition-colors h-[38px]"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Register</span>
@@ -592,24 +548,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       Structure minute-by-minute programming, speaker slots, and breaks.
                     </p>
                   </div>
-
-                  <button
-                    onClick={handleGenerateAgenda}
-                    disabled={isGeneratingAgenda}
-                    className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2 px-3.5 rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap"
-                  >
-                    {isGeneratingAgenda ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Generating...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Generate with AI</span>
-                      </>
-                    )}
-                  </button>
                 </div>
 
                 {/* Add Manual Agenda Item */}
@@ -654,7 +592,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </div>
                   <button
                     type="submit"
-                    className="flex items-center justify-center gap-1 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg border border-slate-700 h-[33px]"
+                    className="flex items-center justify-center gap-1 py-1.5 px-4 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-full border border-slate-700 h-[33px]"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add</span>
@@ -697,131 +635,13 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-10 border border-dashed border-slate-800 rounded-lg">
-                      <p className="text-xs text-slate-400 mb-2">No timeline segments configured yet.</p>
-                      <button
-                        onClick={handleGenerateAgenda}
-                        disabled={isGeneratingAgenda}
-                        className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Generate with AI automatically</span>
-                      </button>
+                    <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl">
+                      <Clock className="w-6 h-6 text-slate-600 mx-auto mb-2" />
+                      <p className="text-xs text-slate-400">No timeline segments configured yet.</p>
+                      <p className="text-[11px] text-slate-500 mt-1">Add session slots, keynotes, and breaks using the form above.</p>
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Tab 4: AI Promo & Communications */}
-            {activeTab === 'marketing' && (
-              <div className="space-y-6">
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                      <Share2 className="w-4 h-4 text-indigo-400" />
-                      <span>Executive Copy & Outreach Studio</span>
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Draft high-impact promotional copy tailored for your audience channel.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800">
-                      {(['Email', 'LinkedIn', 'Twitter/X'] as const).map((ch) => (
-                        <button
-                          key={ch}
-                          type="button"
-                          onClick={() => setMarketingChannel(ch)}
-                          className={`text-xs px-2.5 py-1 rounded transition-colors ${
-                            marketingChannel === ch
-                              ? 'bg-indigo-600 text-white font-semibold'
-                              : 'text-slate-400 hover:text-slate-200'
-                          }`}
-                        >
-                          {ch}
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleGenerateMarketing}
-                      disabled={isGeneratingMarketing}
-                      className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2 px-3 rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap"
-                    >
-                      {isGeneratingMarketing ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Drafting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-3.5 h-3.5" />
-                          <span>Draft Copy</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Marketing Copy Result */}
-                {marketingCopy ? (
-                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                      <div>
-                        <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Subject / Hook</span>
-                        <h4 className="text-sm font-bold text-white mt-0.5">{marketingCopy.headline}</h4>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleCopyMarketing}
-                        className="flex items-center gap-1.5 text-xs text-slate-300 hover:text-white px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
-                      >
-                        {copiedMarketing ? (
-                          <>
-                            <Check className="w-3.5 h-3.5 text-emerald-400" />
-                            <span className="text-emerald-400 font-semibold">Copied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>Copy All</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="text-xs text-slate-300 whitespace-pre-line leading-relaxed font-sans max-h-56 overflow-y-auto pr-1">
-                      {marketingCopy.content}
-                    </div>
-
-                    {marketingCopy.hashtags && marketingCopy.hashtags.length > 0 && (
-                      <div className="flex items-center gap-2 pt-3 border-t border-slate-800 text-xs text-indigo-400 font-mono">
-                        {marketingCopy.hashtags.map((h, i) => (
-                          <span key={i}>{h}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 border border-dashed border-slate-800 rounded-xl">
-                    <Share2 className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                    <p className="text-xs text-slate-400 mb-3">
-                      Select your target channel above and click <strong>Draft Copy</strong> to generate professional outreach copy with Gemini.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleGenerateMarketing}
-                      disabled={isGeneratingMarketing}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Draft Initial Announcement</span>
-                    </button>
-                  </div>
-                )}
               </div>
             )}
           </div>

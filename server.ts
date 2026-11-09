@@ -11,6 +11,14 @@ import generateMarketingHandler from "./api/gemini/generate-marketing";
 
 const PORT = 3000;
 
+// Prevent unexpected process exits
+process.on('uncaughtException', (err) => {
+  console.error('Server uncaughtException:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Server unhandledRejection at:', promise, 'reason:', reason);
+});
+
 async function startServer() {
   const app = express();
   app.use(express.json());
@@ -38,8 +46,12 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
+  });
+
+  server.on('error', (err: any) => {
+    console.error('Server socket error:', err);
   });
 }
 

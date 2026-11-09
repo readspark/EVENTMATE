@@ -22,46 +22,105 @@
               mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
             },
             colors: {
-              brand: {
-                50: '#eef2ff',
-                100: '#e0e7ff',
-                500: '#6366f1',
-                600: '#4f46e5',
-                700: '#4338ca',
-                800: '#3730a3',
-                900: '#312e81',
-              }
+              primary: {
+                DEFAULT: '#7C3AED',
+                hover: '#6D28D9',
+                tint: '#2E1065',
+              },
+              accent: '#F43F5E',
+              canvas: '#000000',
+              surface: '#000000',
+              border: '#1F1F24',
+              body: '#FFFFFF',
+              muted: '#8E8E93',
+              success: '#10B981',
+              warning: '#F59E0B',
+              error: '#EF4444',
             }
           }
         }
       }
     </script>
     <style>
+      :root {
+        --primary: #7C3AED;
+        --primary-hover: #6D28D9;
+        --primary-tint: #1E1035;
+        --accent: #F43F5E;
+        --bg: #040e3b;
+        --surface: #040e3b;
+        --border: #1F1F24;
+        --text: #FFFFFF;
+        --text-muted: #8E8E93;
+        --success: #10B981;
+        --warning: #F59E0B;
+        --error: #EF4444;
+      }
+
       body {
+        background-color: #040e3b;
+        color: #FFFFFF;
         font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
       }
+
       .tabular-nums {
         font-variant-numeric: tabular-nums;
       }
-      /* Custom smooth scrollbar */
+
+      html, body {
+        background-color: #040e3b !important;
+        color: #FFFFFF !important;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: #040e3b;
+        color: #FFFFFF;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+
+      .tabular-nums {
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Specific smooth transitions for interactive elements only (no global wildcard) */
+      button, a, input, select, textarea, [role="button"] {
+        transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after, button, a, input, select, textarea {
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* Custom smooth dark scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
       }
       ::-webkit-scrollbar-track {
-        background: #0f172a;
+        background: #040e3b;
       }
       ::-webkit-scrollbar-thumb {
-        background: #334155;
+        background: #1e3a8a;
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #475569;
+        background: #3b82f6;
       }
     </style>
   </head>
-  <body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-600 selection:text-white">
+  <body class="bg-[#040e3b] text-white antialiased selection:bg-[#7C3AED] selection:text-white">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

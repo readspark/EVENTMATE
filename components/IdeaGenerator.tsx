@@ -37,7 +37,6 @@ export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, 
   };
 
   const handleAddEvent = (idea: { title: string; description: string }) => {
-    // Derive sensible category from title
     let category: EventCategory = 'Conference';
     const lower = (idea.title + ' ' + idea.description).toLowerCase();
     if (lower.includes('workshop') || lower.includes('masterclass') || lower.includes('hands-on')) {
@@ -58,62 +57,37 @@ export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, 
   };
 
   return (
-    <section id="ideas-section" className="bg-slate-900 border border-slate-800 rounded-xl p-6 lg:p-7 shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-indigo-400" />
-            <h2 className="text-xl font-bold text-white tracking-tight">AI Event Ideation Studio</h2>
-          </div>
-          <p className="text-xs md:text-sm text-slate-400">
-            Generate executive-ready event briefs, target attendee profiles, and programming formats powered by Gemini.
-          </p>
-        </div>
-
-        {/* Quick Inspiration Prompts */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs text-slate-500 mr-1 flex items-center gap-1">
-            <Lightbulb className="w-3 h-3 text-amber-400" />
-            <span>Try:</span>
-          </span>
-          {INSPIRATION_THEMES.slice(0, 3).map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleGenerate(item.label)}
-              disabled={isLoading}
-              className="text-xs px-2.5 py-1 rounded bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition-colors whitespace-nowrap"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+    <section id="ideas-section" className="bg-[#020204] border border-[#1F1F24] rounded-xl p-6 shadow-xs">
+      <div className="flex items-center gap-2 mb-5">
+        <Sparkles className="w-4 h-4 text-[#A78BFA]" />
+        <h2 className="text-base font-semibold text-white tracking-tight">AI Event Ideation Studio</h2>
       </div>
 
       {/* Input Group */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2.5">
         <div className="relative flex-grow">
           <input
             type="text"
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            placeholder="Enter an industry, topic, or theme (e.g. 'Enterprise Autonomous Agents', 'Sustainable Packaging Summit')..."
-            className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700/80 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
+            placeholder="Enter an industry, topic, or theme (e.g. 'Autonomous Agents', 'Sustainable Packaging Summit')..."
+            className="w-full px-4 py-2 bg-[#060608] border border-[#1F1F24] rounded-full text-white text-xs placeholder-[#71717A] focus:outline-none focus:ring-1 focus:ring-[#7C3AED] focus:border-[#7C3AED] transition-all"
             onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
           />
         </div>
         <button
           onClick={() => handleGenerate()}
           disabled={isLoading || !theme.trim()}
-          className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-2.5 px-6 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="flex items-center justify-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-medium text-xs py-2 px-5 rounded-full shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
               <span>Generating...</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Generate Concepts</span>
             </>
           )}
@@ -122,32 +96,32 @@ export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, 
 
       {/* Generated Concepts Cards */}
       {ideas.length > 0 && (
-        <div className="mt-6 pt-5 border-t border-slate-800/80 space-y-4 animate-in fade-in duration-300">
+        <div className="mt-6 pt-5 border-t border-[#1F1F24] space-y-4 animate-in fade-in duration-300">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-200">
-              Generated Event Proposals <span className="text-xs text-slate-500 font-mono">({ideas.length})</span>
+            <h3 className="text-xs font-semibold text-white">
+              Generated Event Proposals <span className="text-xs text-[#8E8E93] font-mono">({ideas.length})</span>
             </h3>
-            <span className="text-xs text-slate-400">Click to add any concept to your active dashboard</span>
+            <span className="text-[11px] text-[#8E8E93]">Click to add concept to your active events</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {ideas.map((idea, index) => (
               <div 
                 key={index} 
-                className="bg-slate-950 border border-slate-800/90 hover:border-slate-700 rounded-lg p-5 flex flex-col justify-between transition-colors shadow-sm"
+                className="bg-[#060608] border border-[#1F1F24] hover:border-[#33333D] rounded-xl p-5 flex flex-col justify-between transition-all shadow-xs"
               >
                 <div>
-                  <h4 className="font-bold text-white text-base mb-2">{idea.title}</h4>
-                  <div className="text-xs text-slate-300/90 whitespace-pre-line leading-relaxed mb-4 max-h-48 overflow-y-auto pr-1">
+                  <h4 className="font-semibold text-white text-sm mb-2">{idea.title}</h4>
+                  <div className="text-xs text-[#8E8E93] whitespace-pre-line leading-relaxed mb-4 max-h-48 overflow-y-auto pr-1">
                     {idea.description}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">Includes auto-configured agenda & logistics</span>
+                <div className="pt-3 border-t border-[#18181E] flex items-center justify-between">
+                  <span className="text-[11px] text-[#8E8E93]">Auto-configures timeline & logistics</span>
                   <button
                     onClick={() => handleAddEvent(idea)}
-                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-1.5 px-3.5 rounded-md transition-colors"
+                    className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-medium py-1.5 px-4 rounded-full transition-all"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add to Dashboard</span>

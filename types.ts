@@ -19,7 +19,7 @@ export interface Registration {
 }
 
 export interface Event {
-  id: number;
+  id: string | number;
   title: string;
   description: string;
   date: string;
@@ -31,6 +31,7 @@ export interface Event {
   capacity?: number;
   registrations: Registration[];
   agenda?: AgendaItem[];
+  ownerId?: string;
 }
 
 export interface ChatMessage {
