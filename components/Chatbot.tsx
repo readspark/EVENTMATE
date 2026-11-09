@@ -59,68 +59,68 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-40 bg-[#7C3AED] hover:bg-[#6D28D9] text-white w-12 h-12 rounded-full shadow-lg hover:shadow-[#7C3AED]/20 flex items-center justify-center transition-all focus:outline-none"
+        className="fixed bottom-6 right-6 z-40 bg-[#7C3AED] hover:bg-[#6D28D9] text-white w-14 h-14 rounded-full shadow-xl hover:shadow-[#7C3AED]/25 flex items-center justify-center transition-all focus:outline-none"
         aria-label="Open AI Planning Assistant"
         title="EventMate AI Assistant"
       >
-        <MessageSquare className="w-5 h-5" />
+        <MessageSquare className="w-6 h-6" />
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-20 right-6 z-50 w-full max-w-sm sm:max-w-md h-[500px] bg-[#020204] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-22 right-6 z-50 w-full max-w-md sm:max-w-lg h-[540px] bg-[#020204] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
-          <div className="p-3.5 bg-[#060608] border-b border-[#1F1F24] flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full bg-[#181126] border border-[#7C3AED]/30 flex items-center justify-center text-[#A78BFA]">
-                <Bot className="w-3.5 h-3.5" />
+          <div className="p-4 bg-[#060608] border-b border-[#1F1F24] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#181126] border border-[#7C3AED]/30 flex items-center justify-center text-[#A78BFA] shrink-0">
+                <Bot className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-white leading-none">EventMate AI Partner</h3>
-                <div className="text-[11px] text-[#8E8E93] mt-1">
+                <h3 className="text-sm font-semibold text-white leading-none">EventMate AI Partner</h3>
+                <div className="text-xs text-[#8E8E93] mt-1">
                   Direct Definite Planning Intelligence
                 </div>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-[#8E8E93] hover:text-white p-1 rounded-full hover:bg-[#121215] transition-colors"
+              className="text-[#8E8E93] hover:text-white p-1.5 rounded-full hover:bg-[#121215] transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4.5 h-4.5" />
             </button>
           </div>
 
           {/* Chat Messages */}
-          <div ref={chatboxRef} className="flex-grow p-4 space-y-3 overflow-y-auto bg-[#020204]">
+          <div ref={chatboxRef} className="flex-grow p-4 space-y-3.5 overflow-y-auto bg-[#020204]">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`relative group rounded-2xl px-3.5 py-2.5 max-w-[85%] text-xs leading-relaxed ${
+                  className={`relative group rounded-2xl px-4 py-3 max-w-[88%] text-sm leading-relaxed ${
                     msg.sender === 'user'
-                      ? 'bg-[#7C3AED] text-white shadow-xs'
+                      ? 'bg-[#7C3AED] text-white shadow-xs font-medium'
                       : 'bg-[#0A0A0E] text-[#E4E4E7] border border-[#1F1F24] shadow-xs'
                   }`}
                 >
                   {msg.isLoading ? (
                     <div className="flex items-center gap-2 py-0.5">
-                      <Loader2 className="w-3 h-3 animate-spin text-[#A78BFA]" />
-                      <span className="text-[#8E8E93] text-xs">Evaluating...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#A78BFA]" />
+                      <span className="text-[#8E8E93] text-sm">Evaluating...</span>
                     </div>
                   ) : (
                     <>
-                      <div className="whitespace-pre-line font-sans">{msg.text}</div>
+                      <div className="whitespace-pre-line font-sans text-sm">{msg.text}</div>
                       {msg.sender === 'bot' && (
                         <button
                           onClick={() => handleCopyMessage(msg.id, msg.text)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2 right-2 p-1 bg-black border border-[#1F1F24] rounded-full text-[#8E8E93] hover:text-[#A78BFA]"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2.5 right-2 p-1.5 bg-black border border-[#1F1F24] rounded-full text-[#8E8E93] hover:text-[#A78BFA]"
                           title="Copy response"
                         >
                           {copiedId === msg.id ? (
-                            <Check className="w-3 h-3 text-[#10B981]" />
+                            <Check className="w-3.5 h-3.5 text-[#10B981]" />
                           ) : (
-                            <Copy className="w-3 h-3" />
+                            <Copy className="w-3.5 h-3.5" />
                           )}
                         </button>
                       )}
@@ -132,22 +132,22 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
           </div>
 
           {/* Input Footer */}
-          <div className="p-3 bg-[#060608] border-t border-[#1F1F24] flex items-center gap-2">
+          <div className="p-3.5 bg-[#060608] border-t border-[#1F1F24] flex items-center gap-2.5">
             <input
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Ask a definite question..."
-              className="flex-grow px-3.5 py-2 bg-[#0A0A0E] border border-[#1F1F24] rounded-full text-xs text-white placeholder-[#71717A] focus:outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
+              className="flex-grow px-4 py-2.5 bg-[#0A0A0E] border border-[#1F1F24] rounded-full text-sm text-white placeholder-[#71717A] focus:outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
             />
             <button
               onClick={() => handleSendMessage()}
               disabled={!userInput.trim()}
-              className="p-2 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 text-white rounded-full transition-all shrink-0"
+              className="p-2.5 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 text-white rounded-full transition-all shrink-0"
               title="Send message"
             >
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </div>

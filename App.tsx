@@ -59,6 +59,7 @@ export default function App() {
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [pendingNewEvent, setPendingNewEvent] = useState<Event | null>(null);
 
   // Search & view state (category & status filters removed as requested)
   const [searchQuery, setSearchQuery] = useState('');
@@ -164,7 +165,7 @@ export default function App() {
       location: 'Main Auditorium / Hybrid',
       isVirtual: false,
       category,
-      status: 'Draft',
+      status: 'Upcoming',
       capacity,
       registrations: [],
       agenda: []
@@ -230,12 +231,31 @@ export default function App() {
     }
   };
 
+  const handleRequireSignInForEvent = (newEvent: Event) => {
+    setPendingNewEvent(newEvent);
+    setIsSignInModalOpen(true);
+  };
+
   const handleSignIn = (user: User) => {
     setCurrentUser(user);
     localStorage.setItem('eventmate-user', JSON.stringify(user));
     setIsSignInModalOpen(false);
-    addToast(`Signed in as ${user.name}`);
+
+    if (pendingNewEvent) {
+      handleCreateEvent(pendingNewEvent);
+      setPendingNewEvent(null);
+      setIsNewEventModalOpen(false);
+    }
   };
+
+  useEffect(() => {
+    if (currentUser && pendingNewEvent) {
+      handleCreateEvent(pendingNewEvent);
+      setPendingNewEvent(null);
+      setIsNewEventModalOpen(false);
+      setIsSignInModalOpen(false);
+    }
+  }, [currentUser, pendingNewEvent]);
 
   const handleSignOut = async () => {
     try {
@@ -452,8 +472,13 @@ export default function App() {
       {/* New Event Modal */}
       <NewEventModal
         isOpen={isNewEventModalOpen}
-        onClose={() => setIsNewEventModalOpen(false)}
+        onClose={() => {
+          setIsNewEventModalOpen(false);
+          setPendingNewEvent(null);
+        }}
         onCreate={handleCreateEvent}
+        currentUser={currentUser}
+        onRequireSignIn={handleRequireSignInForEvent}
       />
 
       {/* Portfolio Overview Modal */}

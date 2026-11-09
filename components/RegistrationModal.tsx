@@ -8,7 +8,7 @@ import type { Event, Registration, User, EventCategory, EventStatus, AgendaItem 
 import { generateReminderEmail } from '../services/geminiService';
 import { downloadIcsCalendarFile } from '../services/calendarService';
 import { ReminderModal } from './ReminderModal';
-import { formatIndianDate } from '../utils/dateUtils';
+import { formatIndianDate, getEventStatus } from '../utils/dateUtils';
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -170,7 +170,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
               <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
                 <span className="text-indigo-400 font-semibold">{formData.category || 'Event'}</span>
                 <span aria-hidden="true" className="text-slate-600">·</span>
-                <span>{formData.status || 'Upcoming'}</span>
+                <span className={
+                  getEventStatus(formData) === 'In Progress' 
+                    ? 'text-emerald-400 font-semibold' 
+                    : getEventStatus(formData) === 'Completed'
+                    ? 'text-slate-500'
+                    : 'text-indigo-300'
+                }>
+                  {getEventStatus(formData)}
+                </span>
                 <span aria-hidden="true" className="text-slate-600">·</span>
                 <span className="font-mono tabular-nums">{formatIndianDate(formData.date)}</span>
               </div>
@@ -268,21 +276,21 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </div>
 
                   <div>
-                    <label htmlFor="status" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                       Status
                     </label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={formData.status || 'Upcoming'}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="Upcoming">Upcoming</option>
-                      <option value="Draft">Draft</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                    </select>
+                    <div className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-lg text-white text-sm font-medium flex items-center justify-between h-[38px]">
+                      <span className={
+                        getEventStatus(formData) === 'In Progress' 
+                          ? 'text-emerald-400 font-semibold' 
+                          : getEventStatus(formData) === 'Completed'
+                          ? 'text-slate-400 font-medium'
+                          : 'text-indigo-300 font-medium'
+                      }>
+                        {getEventStatus(formData)}
+                      </span>
+                      <span className="text-[10px] text-slate-500">Auto-calculated</span>
+                    </div>
                   </div>
 
                   <div>

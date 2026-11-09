@@ -87,3 +87,77 @@ export function normalizeToIndianDate(dateStr?: string): string {
   if (!dateStr || !dateStr.trim()) return getTodayIndianDate();
   return formatIndianDate(parseIndianDate(dateStr));
 }
+
+/**
+ * Helper to parse a time string like "09:00 AM", "5:30 PM", "14:00", "9am" into { hours, minutes }
+ */
+function parseTimeString(timeStr: string): { hours: number; minutes: number } | null {
+  if (!timeStr) return null;
+  const trimmed = timeStr.trim().toLowerCase();
+  const match = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
+  if (!match) return null;
+
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  const ampm = match[3];
+
+  if (ampm === 'pm' && hours < 12) {
+    hours += 12;
+  } else if (ampm === 'am' && hours === 12) {
+    hours = 0;
+  }
+
+  if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+    return { hours, minutes };
+  }
+  return null;
+}
+
+/**
+ * Dynamically computes an event's status ('Upcoming', 'In Progress', or 'Completed')
+ * based on its date and time relative to current time.
+ */
+export function getEventStatus(event?: { date?: string; time?: string }): 'Upcoming' | 'In Progress' | 'Completed' {
+  if (!event || !event.date) return 'Upcoming';
+
+  const dateObj = parseIndianDate(event.date);
+  const now = new Date();
+
+  // Create start and end Date objects for the event
+  let start = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 0, 0, 0);
+  let end = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 23, 59, 59);
+
+  if (event.time && event.time.trim()) {
+    const rawTime = event.time.trim();
+    // Check if time range is provided (e.g. "09:00 AM - 05:00 PM" or "10:00 AM to 02:00 PM")
+    const rangeParts = rawTime.split(/[-–—]|(?:\s+to\s+)/i);
+
+    if (rangeParts.length >= 2) {
+      const startTimeParsed = parseTimeString(rangeParts[0]);
+      const endTimeParsed = parseTimeString(rangeParts[1]);
+
+      if (startTimeParsed) {
+        start.setHours(startTimeParsed.hours, startTimeParsed.minutes, 0, 0);
+      }
+      if (endTimeParsed) {
+        end.setHours(endTimeParsed.hours, endTimeParsed.minutes, 59, 999);
+      }
+    } else {
+      // Single time specified (e.g. "10:00 AM")
+      const singleTimeParsed = parseTimeString(rawTime);
+      if (singleTimeParsed) {
+        start.setHours(singleTimeParsed.hours, singleTimeParsed.minutes, 0, 0);
+        // Default end time to 2 hours after start, or end of day
+        end.setHours(Math.min(23, singleTimeParsed.hours + 2), singleTimeParsed.minutes, 59, 999);
+      }
+    }
+  }
+
+  if (now < start) {
+    return 'Upcoming';
+  } else if (now >= start && now <= end) {
+    return 'In Progress';
+  } else {
+    return 'Completed';
+  }
+}

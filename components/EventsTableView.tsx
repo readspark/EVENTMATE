@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, MapPin, Users, Video, CalendarPlus, Trash2, ArrowRight } from 'lucide-react';
 import type { Event } from '../types';
 import { downloadIcsCalendarFile } from '../services/calendarService';
-import { formatIndianDate } from '../utils/dateUtils';
+import { formatIndianDate, getEventStatus } from '../utils/dateUtils';
 
 interface EventsTableViewProps {
   events: Event[];
@@ -35,6 +35,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
             const count = event.registrations?.length || 0;
             const cap = event.capacity || 100;
             const pct = Math.min(100, Math.round((count / cap) * 100));
+            const status = getEventStatus(event);
 
             return (
               <tr 
@@ -81,8 +82,14 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                 </td>
 
                 <td className="py-3.5 px-4 text-center">
-                  <span className="text-xs font-medium text-slate-300">
-                    {event.status || 'Upcoming'}
+                  <span className={`text-xs font-medium ${
+                    status === 'In Progress' 
+                      ? 'text-emerald-400 font-semibold' 
+                      : status === 'Completed'
+                      ? 'text-slate-500'
+                      : 'text-indigo-300'
+                  }`}>
+                    {status}
                   </span>
                 </td>
 

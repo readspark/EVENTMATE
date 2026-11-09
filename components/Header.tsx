@@ -113,18 +113,8 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
 
                   <button
-                    onClick={() => { setIsDropdownOpen(false); onMyEventsClick(); }}
-                    className="w-full text-left px-3.5 py-2 text-xs text-[#8E8E93] hover:text-white hover:bg-[#0C0C0E] flex items-center gap-2 transition-colors rounded-xl mx-1"
-                  >
-                    <Calendar className="w-3.5 h-3.5 text-[#8E8E93]" />
-                    <span>View All Planned</span>
-                  </button>
-
-                  <div className="border-t border-[#1F1F24] my-1" />
-
-                  <button
                     onClick={() => { setIsDropdownOpen(false); onSignOutClick(); }}
-                    className="w-full text-left px-3.5 py-2 text-xs text-[#EF4444] hover:bg-rose-950/20 flex items-center gap-2 transition-colors font-medium rounded-xl mx-1"
+                    className="w-full text-left px-3.5 py-2 text-xs text-[#EF4444] hover:bg-rose-950/20 flex items-center gap-2 transition-colors font-medium rounded-xl mx-1 my-1"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     <span>Sign Out</span>

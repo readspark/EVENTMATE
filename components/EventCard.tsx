@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Video, CalendarPlus, Trash2, ArrowRight } from 'lucide-react';
 import type { Event } from '../types';
 import { downloadIcsCalendarFile } from '../services/calendarService';
-import { formatIndianDate } from '../utils/dateUtils';
+import { formatIndianDate, getEventStatus } from '../utils/dateUtils';
 
 interface EventCardProps {
   event: Event;
@@ -21,6 +21,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   const registrationsCount = event.registrations?.length || 0;
   const capacity = event.capacity || 100;
   const percentFilled = Math.min(100, Math.round((registrationsCount / capacity) * 100));
+  const currentStatus = getEventStatus(event);
 
   useEffect(() => {
     if (!isConfirmingDelete) return;
@@ -56,7 +57,15 @@ export const EventCard: React.FC<EventCardProps> = ({
         <div className="flex items-center gap-2 text-xs text-slate-400 mb-2.5">
           <span className="font-medium text-indigo-400">{event.category || 'General'}</span>
           <span aria-hidden="true" className="text-slate-600">·</span>
-          <span>{event.status || 'Upcoming'}</span>
+          <span className={
+            currentStatus === 'In Progress'
+              ? 'text-emerald-400 font-semibold animate-pulse'
+              : currentStatus === 'Completed'
+              ? 'text-slate-500 font-medium'
+              : 'text-indigo-300 font-medium'
+          }>
+            {currentStatus}
+          </span>
           <span aria-hidden="true" className="text-slate-600">·</span>
           <span className="font-mono tabular-nums">{formatIndianDate(event.date)}</span>
         </div>

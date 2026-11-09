@@ -1,6 +1,6 @@
 export type EventCategory = 'Conference' | 'Workshop' | 'Meetup' | 'Webinar' | 'Networking' | 'Executive';
 
-export type EventStatus = 'Draft' | 'Upcoming' | 'In Progress' | 'Completed';
+export type EventStatus = 'Upcoming' | 'In Progress' | 'Completed';
 
 export interface AgendaItem {
   id: string;

@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, MapPin, Users, Video } from 'lucide-react';
-import type { Event, EventCategory } from '../types';
-import { normalizeToIndianDate } from '../utils/dateUtils';
+import type { Event, EventCategory, User } from '../types';
+import { normalizeToIndianDate, getEventStatus } from '../utils/dateUtils';
 
 interface NewEventModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (event: Event) => void;
+  currentUser: User | null;
+  onRequireSignIn: (event: Event) => void;
 }
 
-export const NewEventModal: React.FC<NewEventModalProps> = ({ isOpen, onClose, onCreate }) => {
+export const NewEventModal: React.FC<NewEventModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onCreate, 
+  currentUser, 
+  onRequireSignIn 
+}) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('09:00 AM - 05:00 PM');
+  const [time, setTime] = useState('');
   const [location, setLocation] = useState('');
   const [isVirtual, setIsVirtual] = useState(false);
   const [category, setCategory] = useState<EventCategory>('Conference');
   const [capacity, setCapacity] = useState<number>(100);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTitle('');
+      setDescription('');
+      setDate('');
+      setTime('');
+      setLocation('');
+      setIsVirtual(false);
+      setCategory('Conference');
+      setCapacity(100);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -34,11 +55,16 @@ export const NewEventModal: React.FC<NewEventModalProps> = ({ isOpen, onClose, o
       location: location.trim() || (isVirtual ? 'Virtual Meeting' : 'Venue to be decided'),
       isVirtual,
       category,
-      status: 'Upcoming',
+      status: getEventStatus({ date: normalizeToIndianDate(date.trim()), time: time.trim() }),
       capacity: Number(capacity) || 100,
       registrations: [],
       agenda: []
     };
+
+    if (!currentUser) {
+      onRequireSignIn(newEvent);
+      return;
+    }
 
     onCreate(newEvent);
     onClose();
