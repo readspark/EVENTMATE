@@ -103,30 +103,6 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
           Sign in to save your planned events, customize organizer email signatures, and manage attendees.
         </p>
 
-        {/* 1-Click Quick Sign In for the current user session */}
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => handleQuickSignIn('readspark2025@gmail.com')}
-            className="w-full flex items-center justify-between p-2.5 rounded-full bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-800/60 text-left transition-colors group mb-3 px-3.5"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                R
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-semibold text-white group-hover:text-indigo-200 truncate">
-                  Continue as readspark2025
-                </div>
-                <div className="text-[11px] text-slate-400 truncate">
-                  readspark2025@gmail.com
-                </div>
-              </div>
-            </div>
-            <ArrowRight className="w-3.5 h-3.5 text-indigo-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
-          </button>
-        </div>
-
         {/* Google Sign-In Buttons */}
         <div className="space-y-2 mb-4">
           <button

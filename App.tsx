@@ -65,20 +65,9 @@ export default function App() {
   const [sortBy, setSortBy] = useState<'date-asc' | 'date-desc' | 'attendees' | 'title'>('date-asc');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
-  // Toasts state
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
-
-  const addToast = (message: string, type: 'success' | 'info' | 'warning' = 'success') => {
-    const id = `toast-${Date.now()}-${Math.random()}`;
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3500);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
+  // Toast pop-up notifications disabled
+  const addToast = (_message?: string, _type?: string) => {};
+  const removeToast = (_id?: string) => {};
 
   // Initialize Firebase Auth listener
   useEffect(() => {
@@ -502,12 +491,6 @@ export default function App() {
         isOpen={isCalendarModalOpen}
         onClose={() => setIsCalendarModalOpen(false)}
         events={events}
-      />
-
-      {/* Toast Feedback Notifications */}
-      <ToastContainer
-        toasts={toasts}
-        onDismiss={removeToast}
       />
     </div>
   );
