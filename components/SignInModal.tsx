@@ -28,7 +28,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
     setError('');
     try {
       const { user } = await signInWithGoogle();
-      onSignIn(user);
+      onSignIn({ ...user, email: user.email.trim().toLowerCase() });
       onClose();
     } catch (err: any) {
       console.error("Google sign in failure:", err);
@@ -60,7 +60,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
     const formattedName = extractedName.charAt(0).toUpperCase() + extractedName.slice(1);
     onSignIn({
       name: formattedName || 'Event Director',
-      email: userEmail,
+      email: userEmail.trim().toLowerCase(),
       role: 'Event Director'
     });
     onClose();
@@ -77,7 +77,8 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
       setError('Please enter a valid email address.');
       return;
     }
-    onSignIn({ name: name.trim(), email: email.trim(), role });
+    const cleanEmail = email.trim().toLowerCase();
+    onSignIn({ name: name.trim(), email: cleanEmail, role });
     onClose();
   };
 

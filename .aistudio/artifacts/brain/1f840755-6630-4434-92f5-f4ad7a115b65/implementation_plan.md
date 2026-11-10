@@ -1,109 +1,124 @@
-# Color Palette Integration Plan
+# Multi-Device Cloud Synchronization for EventMate
 
-Apply the user's custom color palette across EventMate Pro to establish a clean, cohesive emerald, amber, and slate visual identity with crisp contrast and accessible typographic hierarchy.
+A real-time, multi-device cloud synchronization architecture for EventMate using Firebase Firestore and Firebase Authentication. When a user signs in, creates events, and later signs in on another device with the same email, all their events, attendee lists, check-in records, and run-of-show schedules seamlessly sync across devices in real time.
 
-### User Review & Critical Decisions
+## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following color distribution decisions were confirmed during clarification:
-> - **Primary (`#047857`)**: Main action buttons (Create Event, Register, Save, Generate, Chatbot launcher), active top navigation tabs, and primary interactive indicators.
-> - **Secondary (`#10B981`)**: Check-in badges, success confirmations, checkmark icons, and active progress highlights.
-> - **Accent (`#FBBF24`)**: AI ideation sparkles, key high-priority callouts, ratings, and active promotional banners.
-> - **Background (`#F1F5F9`)**: Canvas backdrop for `html`, `body`, and page containers.
-> - **Surface (`#FFFFFF`)**: Modal windows, cards, table surfaces, dropdown panels, and chat popup body.
-> - **Main Text (`#0F172A`)**: Headings, titles, high-contrast labels, and primary inputs.
-> - **Secondary Text (`#64748B`)**: Metadata timestamps, captions, subheadings, and placeholders.
-> - **Theme Variables**: Registered in `:root` CSS variables and Tailwind theme config for system-wide consistency.
+> The following decisions were clarified and confirmed during interactive requirements gathering:
+
+- **Confirmed: Local Event Migration**: When a user with pre-existing local events on a device signs in, those events will automatically migrate to their cloud account without losing any data.
+- **Confirmed: Real-Time Live Sync**: State synchronization across active devices is powered by Firestore real-time listeners (`onSnapshot`), propagating event creations, edits, check-in updates, and deletions immediately across open tabs or devices.
+- **Confirmed: Access & Privacy Boundary**: Events are tied to the creator's authenticated identity (`ownerId` / `creatorEmail`). Only the authenticated event organizer can view and manage their events across devices.
 
 ---
 
-### 1. Overview & Visual Identity
+## 1. Overview & Core Concept
 
-The new palette delivers an organic, high-trust executive feel with deep emerald greens (`#047857`), fresh secondary mint highlights (`#10B981`), warm amber accents (`#FBBF24`), crisp neutral surfaces (`#FFFFFF`), and soft slate canvas tones (`#F1F5F9`).
-
-#### Palette Mapping Matrix
-| Token | HEX | Application / Role |
-|---|---|---|
-| **Primary** | `#047857` | Primary buttons, active nav pills, focused inputs, brand logo accent |
-| **Secondary** | `#10B981` | Checked-in indicators, success badges, check icons, status pill highlight |
-| **Accent** | `#FBBF24` | AI Studio sparkles, quick prompt chips, high-priority notifications, star badges |
-| **Background** | `#F1F5F9` | App canvas, modal backdrop underlays, secondary control containers |
-| **Surface** | `#FFFFFF` | Event cards, data table, modals, popovers, chat window, input surfaces |
-| **Main Text** | `#0F172A` | Primary typography, headers, metric numbers, table titles |
-| **Secondary Text** | `#64748B` | Timestamps, locations, attendee counters, helper copy, table headers |
+- **What It Delivers**: Transforms EventMate from a single-browser `localStorage` sandbox into a cloud-synchronized event operations hub. Any event created or edited on one computer or phone is immediately reflected on any other device where the organizer signs in with the same account.
+- **Target Audience**: Event directors, conference organizers, workshop leaders, and team coordinators managing events across multiple laptops, tablets, or check-in desks.
+- **Key Value**: Organizers no longer risk data loss when clearing browser cache or changing laptops; multiple devices at an event (e.g. check-in iPad and stage manager laptop) stay unified live.
 
 ---
 
-### 2. User Experience & Component System
+## 2. User Experience & Visual Design
+
+- **Sign In & Sync Flow**:
+  1. **Device A**: The user signs in via Google or profile login. If local events exist, they are seamlessly saved to the user's Firestore cloud collection.
+  2. **Device B**: The user signs in using the same email. EventMate instantly subscribes to their Firestore collection, populating the dashboard with all their events, attendee counts, and schedules.
+  3. **Live Syncing**: When an attendee checks in on Device B or a new agenda item is added, Device A updates immediately without needing a manual page refresh.
+  4. **Sign Out Behavior**: Signing out transitions back to a clean guest view while preserving all events safely in the cloud.
+- **Visual Identity & Theme**:
+  - Retains the exact approved color palette:
+    - **Primary (`#047857`)**: Primary buttons, active tabs, focus states.
+    - **Secondary (`#10B981`)**: Real-time sync status badges, check-in indicators, success notifications.
+    - **Accent (`#FBBF24`)**: AI sparkles and highlights.
+    - **Canvas (`#F1F5F9`)**: Light slate background.
+    - **Surface (`#FFFFFF`)**: Crisp white card surfaces with `#E2E8F0` dividing borders.
+    - **Text (`#0F172A`)** and **Secondary Text (`#64748B`)**: High contrast typography adhering to the +2px font size scale.
+- **Interactive Feedback**:
+  - Non-intrusive cloud sync badge in the header/profile dropdown ("Synced with Cloud").
+  - Smooth loading skeletons when switching accounts or initializing first cloud sync.
+  - Optimistic local state updates paired with resilient background cloud sync.
+
+---
+
+## 3. Key Product Decisions & Trade-Offs
+
+- **Firestore Real-Time Listeners vs. Polling/Refresh**:
+  - *Chosen*: `onSnapshot` real-time listeners.
+  - *Why*: Provides instant updates across multiple devices (e.g. attendee checked in at entrance reflects on stage manager dashboard immediately) with minimal network overhead.
+- **Document Model: Root Collection with Owner ID Query vs. Nested Subcollections**:
+  - *Chosen*: Root `/events/{eventId}` collection indexed with `ownerId == auth.uid`.
+  - *Why*: Enables flexible compound queries (such as ordering by date or filtering by status), simplified batch writes, and clean Firestore security rules while enforcing strict owner isolation.
+- **Offline / Local Fallback**:
+  - *Chosen*: Hybrid sync — when unauthenticated, events remain in local storage; upon authentication, local events are imported to cloud, and live Firestore state authoritative cache takes over.
+
+---
+
+## 4. Technical Architecture & Data Strategy
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│ Header: Surface (#FFFFFF) | Wordmark (#047857) | Nav: Active (#047857) │
-├────────────────────────────────────────────────────────────────────────┤
-│ Page Canvas: Background (#F1F5F9)                                      │
-│                                                                        │
-│ ┌────────────────────────────────────────────────────────────────────┐ │
-│ │ Search & Filter Bar: Surface (#FFFFFF) with Text (#0F172A)         │ │
-│ └────────────────────────────────────────────────────────────────────┘ │
-│                                                                        │
-│ ┌───────────────────────────┐  ┌───────────────────────────┐          │
-│ │ Event Card Surface (#FFF) │  │ Event Card Surface (#FFF) │          │
-│ │ Category: #047857         │  │ Category: #047857         │          │
-│ │ Title: #0F172A            │  │ Title: #0F172A            │          │
-│ │ Date/Loc: #64748B         │  │ Date/Loc: #64748B         │          │
-│ │ Check-in Bar: #10B981     │  │ Check-in Bar: #10B981     │          │
-│ │ Primary CTA: #047857      │  │ Primary CTA: #047857      │          │
-│ └───────────────────────────┘  └───────────────────────────┘          │
-│                                                                        │
-│ ┌────────────────────────────────────────────────────────────────────┐ │
-│ │ AI Ideation Studio: Surface (#FFFFFF) | Sparkle: Accent (#FBBF24)  │ │
-│ │ Action: Primary Fill (#047857)                                     │ │
-│ └────────────────────────────────────────────────────────────────────┘ │
-│                                                                        │
-│ Chat Launcher: #047857  │  Chat Window: Surface (#FFFFFF), Bot: #10B981│
+│                          Multi-Device Cloud Architecture               │
 └────────────────────────────────────────────────────────────────────────┘
+
+    [Device A: Desktop Browser]             [Device B: Tablet / Mobile]
+                 │                                       │
+                 ▼                                       ▼
+        Firebase Auth Token                     Firebase Auth Token
+        (uid: "usr_abc123")                     (uid: "usr_abc123")
+                 │                                       │
+                 ├───────────────────┬───────────────────┤
+                 │                   │                   │
+                 ▼                   ▼                   ▼
+    ┌────────────────────────────────────────────────────────────┐
+    │          Firestore Database (Database ID: configured)      │
+    │                                                            │
+    │   Collection: /events/{eventId}                            │
+    │   ├── id: "evt_123"                                        │
+    │   ├── ownerId: "usr_abc123"                                │
+    │   ├── creatorEmail: "organizer@domain.com"                  │
+    │   ├── title, date, time, location, description, category   │
+    │   ├── registrations: [ { id, name, email, checkedIn } ]    │
+    │   ├── timeline: [ { id, time, activity, speaker } ]        │
+    │   └── updatedAt: timestamp                                 │
+    └────────────────────────────────────────────────────────────┘
+                 │                                       │
+                 │ ◄────── onSnapshot live stream ──────►│
 ```
 
-#### Detailed Component Polish:
-1. **Global Entry (`index.html`)**:
-   - Update `tailwind.config` colors to include `brand-primary` (`#047857`), `brand-secondary` (`#10B981`), `brand-accent` (`#FBBF24`), `brand-bg` (`#F1F5F9`), `brand-surface` (`#FFFFFF`), `brand-text` (`#0F172A`), `brand-muted` (`#64748B`).
-   - Update `:root` CSS variables and body background (`bg-[#F1F5F9] text-[#0F172A]`).
-   - Fix body tag in `index.html` which previously retained a hardcoded dark background `#040e3b`.
+### Data Schema (`firebase-blueprint.json`)
+- Define the `Event` entity with required fields (`id`, `title`, `date`, `time`, `location`, `ownerId`, `creatorEmail`, `registrations`, `timeline`).
+- Set up path definition for `/events/{eventId}` referencing the `Event` entity.
 
-2. **Navigation & Header (`components/Header.tsx`)**:
-   - Wordmark badge with `#047857`.
-   - Nav pill toggle: inactive items in `#64748B`, active selected tab in `#047857` with white text.
-   - User profile badge and sign-in button using `#047857`.
+### Security Rules (`firestore.rules`)
+- Enforce strict Attribute-Based Access Control (ABAC):
+  - `allow list, get`: only if `isSignedIn() && resource.data.ownerId == request.auth.uid`.
+  - `allow create`: only if `isSignedIn() && request.resource.data.ownerId == request.auth.uid`.
+  - `allow update`: only if `isSignedIn() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid`.
+  - `allow delete`: only if `isSignedIn() && resource.data.ownerId == request.auth.uid`.
 
-3. **Event Cards & Table (`components/EventCard.tsx`, `components/EventsTableView.tsx`)**:
-   - Surface in `#FFFFFF` with `#E2E8F0` border.
-   - Title in `#0F172A`, metadata in `#64748B`.
-   - Status badge and progress indicators using `#10B981` / `#047857`.
-   - Action buttons: "Manage" and calendar download in `#047857`.
-
-4. **Modals & Overlays (`NewEventModal`, `RegistrationModal`, `DailyCalendarModal`, `MyEventsModal`, `EditProfileModal`, `SignInModal`, `ReminderModal`)**:
-   - Backdrop overlay: `bg-[#0F172A]/40`.
-   - Modal container: `#FFFFFF` surface with `#E2E8F0` border.
-   - Primary submission and save buttons: `#047857` with hover `#065f46`.
-   - Check-in icons and status tags: `#10B981`.
-   - Tab borders for active view: `#047857`.
-
-5. **AI Ideation & Chatbot (`components/IdeaGenerator.tsx`, `components/Chatbot.tsx`)**:
-   - AI Studio title icon and badge accents: warm amber `#FBBF24`.
-   - Generate button and chatbot launcher: `#047857` with soft emerald shadow.
-   - Chatbot window: `#FFFFFF` surface with `#F1F5F9` header and user message bubbles in `#047857`.
+### Service Layer (`services/eventService.ts`)
+- `subscribeToUserEvents(userId, onUpdate, onError)`: Attaches `onSnapshot` query `collection(db, 'events')` filtered by `where('ownerId', '==', userId)`.
+- `createEventInCloud(event, user)`: Writes document to `/events/{eventId}` with `ownerId` and `creatorEmail`.
+- `updateEventInCloud(eventId, partial)`: Updates existing event.
+- `deleteEventFromCloud(eventId)`: Removes event document.
+- `syncLocalEventsToCloud(localEvents, user)`: Scans un-synced events and upserts them to Firestore.
+- `handleFirestoreError`: Implements standard diagnostic error handling.
 
 ---
 
-### 3. Key Technical Decisions & Verification
+## 5. Verification & Testing Plan
 
-- **Theme Variable Architecture**:
-  - CSS variables (`--color-primary`, `--color-secondary`, `--color-accent`, etc.) declared on `:root` in `index.html` for clean single-source-of-truth configuration.
-  - Tailored utility classes mapped in `tailwind.config` to allow intuitive use across all components.
-- **Accessibility & Contrast**:
-  - `#047857` on white achieves a contrast ratio of > 4.5:1 (WCAG AA compliant for regular text and AAA for large text).
-  - `#0F172A` on `#F1F5F9` and `#FFFFFF` provides > 12:1 contrast for crisp readability.
-  - `#FBBF24` is used specifically for decorative sparkles, badges, and icon highlights to prevent yellow-on-white text readability issues.
-- **Verification Strategy**:
-  - Run `compile_applet` and `lint_applet` in parallel to ensure zero TypeScript or syntax regressions.
-  - Restart the dev server to confirm proper rendering across all views and modals.
+1. **Rule & Schema Validation**:
+   - Validate `firebase-blueprint.json` schema and generate `firestore.rules`.
+   - Run linter and deploy rules using the `DeployRules` RPC.
+2. **Local to Cloud Migration**:
+   - Verify that events created in guest mode are uploaded when the user signs in.
+3. **Cross-Device Simulation**:
+   - Sign in as the user in one session and add an event; verify data persists in Firestore.
+   - Simulate opening the app in a private/incognito session and signing in with the same email; verify all events and registrations load in real time.
+   - Trigger attendee check-in and verify instant bi-directional updates.
+4. **Compilation & Lint**:
+   - Run `compile_applet` and `lint_applet` together to verify 0 errors.

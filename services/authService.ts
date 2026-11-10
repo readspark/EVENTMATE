@@ -54,6 +54,7 @@ export const initAuth = (
           cachedAccessToken = credential.accessToken;
         }
         const appUser: User = {
+          uid: result.user.uid,
           name: result.user.displayName || result.user.email?.split('@')[0] || 'User',
           email: result.user.email || '',
           role: 'Event Director'
@@ -69,6 +70,7 @@ export const initAuth = (
   return onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
     if (firebaseUser) {
       const appUser: User = {
+        uid: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
         email: firebaseUser.email || '',
         role: 'Event Director'
@@ -118,6 +120,7 @@ export const signInWithGoogle = async (): Promise<{ user: User; accessToken?: st
     }
 
     const appUser: User = {
+      uid: result.user.uid,
       name: result.user.displayName || result.user.email?.split('@')[0] || 'User',
       email: result.user.email || '',
       role: 'Event Director'

@@ -18,6 +18,13 @@ import { ToastContainer } from './components/ToastContainer';
 
 import type { Event, Registration, User, EventCategory, EventStatus, ToastNotification } from './types';
 import { initAuth, signOutUser } from './services/authService';
+import { 
+  testConnection, 
+  subscribeToUserEvents, 
+  saveEventToCloud, 
+  deleteEventFromCloud, 
+  migrateLocalToCloud 
+} from './services/firebaseService';
 import { parseIndianDate, formatIndianDate } from './utils/dateUtils';
 
 export default function App() {
@@ -68,6 +75,11 @@ export default function App() {
   const addToast = (_message?: string, _type?: string) => {};
   const removeToast = (_id?: string) => {};
 
+  // Validate Firestore connection on boot
+  useEffect(() => {
+    testConnection();
+  }, []);
+
   // Initialize Firebase Auth listener
   useEffect(() => {
     const unsubscribe = initAuth(
@@ -83,6 +95,35 @@ export default function App() {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, []);
+
+  // Real-time Firestore sync: when user signs in, load events across devices & listen live
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // Migrate any pre-existing local events to the user's cloud account
+    const localSaved = localStorage.getItem('eventmate-events-v3');
+    if (localSaved) {
+      try {
+        const parsed = JSON.parse(localSaved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          migrateLocalToCloud(currentUser, parsed);
+        }
+      } catch (err) {
+        console.warn("Local sync check notice:", err);
+      }
+    }
+
+    // Subscribe to real-time events for this user (cross-device sync)
+    const unsubscribe = subscribeToUserEvents(currentUser, (cloudEvents) => {
+      setEvents(cloudEvents);
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [currentUser]);
 
   // Sync events to local storage
   useEffect(() => {
@@ -117,26 +158,40 @@ export default function App() {
     setManagedEvent(null);
   };
 
-  const handleDeleteEvent = (eventId: number) => {
-    setEvents(prev => prev.filter(e => e.id !== eventId));
-    if (managedEvent?.id === eventId) {
+  const handleDeleteEvent = async (eventId: string | number) => {
+    setEvents(prev => prev.filter(e => String(e.id) !== String(eventId)));
+    if (managedEvent && String(managedEvent.id) === String(eventId)) {
       handleCloseManageModal();
+    }
+    if (currentUser) {
+      await deleteEventFromCloud(eventId);
     }
   };
 
-  const handleCreateEvent = (newEvent: Event) => {
-    setEvents(prev => [newEvent, ...prev]);
+  const handleCreateEvent = async (newEvent: Event) => {
+    const eventWithMetadata: Event = {
+      ...newEvent,
+      id: String(newEvent.id),
+      ownerId: currentUser?.uid,
+      creatorEmail: currentUser?.email,
+      createdAt: newEvent.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    setEvents(prev => [eventWithMetadata, ...prev.filter(e => String(e.id) !== String(eventWithMetadata.id))]);
+    if (currentUser) {
+      await saveEventToCloud(currentUser, eventWithMetadata);
+    }
     addToast(`Created "${newEvent.title}"`);
   };
 
-  const handleAddGeneratedEvent = (
+  const handleAddGeneratedEvent = async (
     title: string, 
     description: string, 
     category: EventCategory = 'Conference',
     capacity: number = 100
   ) => {
     const newEvent: Event = {
-      id: Date.now(),
+      id: String(Date.now()),
       title,
       description,
       date: '15/12/2026',
@@ -147,19 +202,34 @@ export default function App() {
       status: 'Upcoming',
       capacity,
       registrations: [],
-      agenda: []
+      agenda: [],
+      ownerId: currentUser?.uid,
+      creatorEmail: currentUser?.email,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-    setEvents(prev => [newEvent, ...prev]);
+    await handleCreateEvent(newEvent);
     setActiveView('events');
     addToast(`"${title}" added to your events list`);
   };
 
-  const handleSaveEvent = (updatedEvent: Event) => {
-    setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
-    setManagedEvent(updatedEvent);
+  const handleSaveEvent = async (updatedEvent: Event) => {
+    const formatted: Event = {
+      ...updatedEvent,
+      id: String(updatedEvent.id),
+      ownerId: updatedEvent.ownerId || currentUser?.uid,
+      creatorEmail: updatedEvent.creatorEmail || currentUser?.email,
+      updatedAt: new Date().toISOString()
+    };
+    setEvents(prev => prev.map(e => String(e.id) === String(formatted.id) ? formatted : e));
+    setManagedEvent(formatted);
+
+    if (currentUser) {
+      await saveEventToCloud(currentUser, formatted);
+    }
   };
 
-  const handleRegisterAttendee = (attendee: Omit<Registration, 'id'>) => {
+  const handleRegisterAttendee = async (attendee: Omit<Registration, 'id'>) => {
     if (!managedEvent) return;
     const newReg: Registration = {
       ...attendee,
@@ -171,34 +241,28 @@ export default function App() {
       ...managedEvent,
       registrations: [...(managedEvent.registrations || []), newReg],
     };
-    handleSaveEvent(updated);
+    await handleSaveEvent(updated);
   };
 
-  const handleToggleCheckIn = (eventId: number, attendeeId: number) => {
-    setEvents(prev => prev.map(event => {
-      if (event.id !== eventId) return event;
-      const updatedRegs = (event.registrations || []).map(r => {
-        if (r.id !== attendeeId) return r;
-        return { ...r, checkedIn: !r.checkedIn };
-      });
-      const updatedEvent = { ...event, registrations: updatedRegs };
-      if (managedEvent?.id === eventId) {
-        setManagedEvent(updatedEvent);
-      }
-      return updatedEvent;
-    }));
+  const handleToggleCheckIn = async (eventId: string | number, attendeeId: number) => {
+    const targetEvent = events.find(e => String(e.id) === String(eventId));
+    if (!targetEvent) return;
+
+    const updatedRegs = (targetEvent.registrations || []).map(r => {
+      if (r.id !== attendeeId) return r;
+      return { ...r, checkedIn: !r.checkedIn };
+    });
+    const updatedEvent: Event = { ...targetEvent, registrations: updatedRegs };
+    await handleSaveEvent(updatedEvent);
   };
 
-  const handleRemoveAttendee = (eventId: number, attendeeId: number) => {
-    setEvents(prev => prev.map(event => {
-      if (event.id !== eventId) return event;
-      const updatedRegs = (event.registrations || []).filter(r => r.id !== attendeeId);
-      const updatedEvent = { ...event, registrations: updatedRegs };
-      if (managedEvent?.id === eventId) {
-        setManagedEvent(updatedEvent);
-      }
-      return updatedEvent;
-    }));
+  const handleRemoveAttendee = async (eventId: string | number, attendeeId: number) => {
+    const targetEvent = events.find(e => String(e.id) === String(eventId));
+    if (!targetEvent) return;
+
+    const updatedRegs = (targetEvent.registrations || []).filter(r => r.id !== attendeeId);
+    const updatedEvent: Event = { ...targetEvent, registrations: updatedRegs };
+    await handleSaveEvent(updatedEvent);
     addToast('Attendee removed', 'info');
   };
 
@@ -243,7 +307,9 @@ export default function App() {
       console.warn("Sign out note:", e);
     }
     setCurrentUser(null);
+    setEvents([]);
     localStorage.removeItem('eventmate-user');
+    localStorage.removeItem('eventmate-events-v3');
     addToast('Signed out', 'info');
   };
 

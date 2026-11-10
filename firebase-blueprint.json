@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "Event": {
+      "title": "Event",
+      "description": "An organized event with attendees and run-of-show agenda",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique event identifier"
+        },
+        "title": {
+          "type": "string",
+          "description": "Event title",
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "description": "Event date"
+        },
+        "time": {
+          "type": "string",
+          "description": "Event start time"
+        },
+        "location": {
+          "type": "string",
+          "description": "Event location or venue"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed event description"
+        },
+        "category": {
+          "type": "string",
+          "description": "Event classification category"
+        },
+        "capacity": {
+          "type": "number",
+          "description": "Maximum attendee capacity"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the event creator"
+        },
+        "creatorEmail": {
+          "type": "string",
+          "description": "Email address of the event creator"
+        },
+        "registrations": {
+          "type": "array",
+          "description": "List of registered attendees and check-in statuses"
+        },
+        "timeline": {
+          "type": "array",
+          "description": "Run-of-show agenda slots"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["id", "title", "date", "time", "ownerId", "creatorEmail"]
+    }
+  },
+  "firestore": {
+    "/events/{eventId}": {
+      "schema": {
+        "$ref": "#/entities/Event"
+      },
+      "description": "User created events partitioned by owner identity"
+    }
+  }
+}

@@ -7,7 +7,7 @@ import { formatIndianDate, getEventStatus } from '../utils/dateUtils';
 interface EventsTableViewProps {
   events: Event[];
   onEditClick: (event: Event) => void;
-  onDeleteClick: (eventId: number) => void;
+  onDeleteClick: (eventId: string | number) => void;
   onToast?: (message: string) => void;
 }
 

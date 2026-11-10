@@ -16,8 +16,8 @@ interface RegistrationModalProps {
   event: Event;
   onSave: (event: Event) => void;
   onRegister: (attendee: Omit<Registration, 'id'>) => void;
-  onToggleCheckIn: (eventId: number, attendeeId: number) => void;
-  onRemoveAttendee: (eventId: number, attendeeId: number) => void;
+  onToggleCheckIn: (eventId: string | number, attendeeId: number) => void;
+  onRemoveAttendee: (eventId: string | number, attendeeId: number) => void;
   currentUser: User | null;
   onToast?: (message: string) => void;
 }

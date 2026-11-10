@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, LogOut } from 'lucide-react';
+import { Calendar, LogOut, Cloud } from 'lucide-react';
 import type { User } from '../types';
 
 interface HeaderProps {
@@ -44,34 +44,48 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Zone 2: User Profile / Authentication */}
         <div className="flex items-center gap-2.5 shrink-0">
           {user ? (
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="h-8 w-8 rounded-full bg-emerald-50 border border-[#10B981]/40 flex items-center justify-center text-[#047857] font-semibold text-xs hover:border-[#047857] focus:outline-none transition-colors shadow-xs"
-                title={user.name}
+            <div className="flex items-center gap-3">
+              <div 
+                className="hidden sm:flex items-center gap-1.5 text-xs text-[#047857] font-medium select-none"
+                title="Events synchronized in real time across your devices"
               >
-                {user.name.charAt(0).toUpperCase()}
-              </button>
+                <Cloud className="w-4 h-4 text-[#10B981]" />
+                <span>Cloud Synced</span>
+              </div>
 
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white border border-[#E2E8F0] rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div
-                    onClick={() => { setIsDropdownOpen(false); onEditProfileClick(); }}
-                    className="p-3 border-b border-[#F1F5F9] hover:bg-[#F1F5F9] cursor-pointer transition-colors"
-                  >
-                    <p className="font-semibold text-[#0F172A] text-xs truncate">{user.name}</p>
-                    <p className="text-[13px] text-[#64748B] truncate">{user.email}</p>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="h-8 w-8 rounded-full bg-emerald-50 border border-[#10B981]/40 flex items-center justify-center text-[#047857] font-semibold text-xs hover:border-[#047857] focus:outline-none transition-colors shadow-xs"
+                  title={user.name}
+                >
+                  {user.name.charAt(0).toUpperCase()}
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-[#E2E8F0] rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div
+                      onClick={() => { setIsDropdownOpen(false); onEditProfileClick(); }}
+                      className="p-3 border-b border-[#F1F5F9] hover:bg-[#F1F5F9] cursor-pointer transition-colors"
+                    >
+                      <p className="font-semibold text-[#0F172A] text-xs truncate">{user.name}</p>
+                      <p className="text-[13px] text-[#64748B] truncate">{user.email}</p>
+                      <div className="mt-1.5 flex items-center gap-1 text-[12px] text-[#047857] font-medium">
+                        <Cloud className="w-3.5 h-3.5 text-[#10B981]" />
+                        <span>Live multi-device sync</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => { setIsDropdownOpen(false); onSignOutClick(); }}
+                      className="w-full text-left px-3.5 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors font-medium rounded-xl mx-1 my-1"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Sign Out</span>
+                    </button>
                   </div>
-
-                  <button
-                    onClick={() => { setIsDropdownOpen(false); onSignOutClick(); }}
-                    className="w-full text-left px-3.5 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors font-medium rounded-xl mx-1 my-1"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ) : (
             <button
