@@ -14,8 +14,8 @@ export const MyEventsModal: React.FC<MyEventsModalProps> = ({ isOpen, onClose, e
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-end justify-end p-4 sm:p-6 z-50 animate-in fade-in duration-200 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-5 relative mb-[85px] animate-in slide-in-from-bottom-4 duration-200">
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-w-lg w-full p-6 relative">
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
           <div>
             <h2 className="text-base font-bold text-white tracking-tight">Active Event Portfolio</h2>

@@ -41,8 +41,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-end justify-end p-4 sm:p-6 z-50 animate-in fade-in duration-200 overflow-y-auto">
-      <div className="bg-[#020204] border border-[#1F1F24] rounded-2xl shadow-2xl shadow-black/80 max-w-xs w-full p-5 relative mb-[85px] animate-in slide-in-from-bottom-4 duration-200">
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-[#020204] border border-[#1F1F24] rounded-2xl shadow-2xl shadow-black/80 max-w-sm w-full p-6 relative">
         <div className="flex items-center justify-between pb-3.5 border-b border-[#1F1F24] mb-4">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-[#060608] border border-[#1F1F24] flex items-center justify-center text-[#A78BFA]">

@@ -71,8 +71,8 @@ export const NewEventModal: React.FC<NewEventModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-end justify-end p-4 sm:p-6 z-50 animate-in fade-in duration-200 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-5 relative mb-[85px] animate-in slide-in-from-bottom-4 duration-200">
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-w-lg w-full p-6 relative">
         <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
           <div>
             <h2 className="text-lg font-bold text-white tracking-tight">Create New Event</h2>
