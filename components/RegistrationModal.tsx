@@ -162,8 +162,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-w-3xl w-full flex flex-col max-h-[92vh] overflow-hidden">
+      <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-end justify-end p-4 sm:p-6 z-50 animate-in fade-in duration-200 overflow-y-auto">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-xl w-full flex flex-col max-h-[80vh] overflow-hidden relative mb-[85px] animate-in slide-in-from-bottom-4 duration-200">
           {/* Modal Header */}
           <div className="p-5 border-b border-slate-800 flex items-start justify-between gap-4">
             <div>
