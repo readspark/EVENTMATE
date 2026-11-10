@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Search, LayoutGrid, Table, Calendar, Plus, Sparkles, RefreshCw, X
+  LayoutGrid, Table, Calendar, Plus, Sparkles, RefreshCw
 } from 'lucide-react';
 
 import { Header } from './components/Header';
@@ -61,9 +61,7 @@ export default function App() {
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [pendingNewEvent, setPendingNewEvent] = useState<Event | null>(null);
 
-  // Search & view state (category & status filters removed as requested)
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'date-asc' | 'date-desc' | 'attendees' | 'title'>('date-asc');
+  // View mode state
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   // Toast pop-up notifications disabled
@@ -101,31 +99,12 @@ export default function App() {
     return events.reduce((sum, e) => sum + (e.registrations?.filter(r => r.checkedIn)?.length || 0), 0);
   }, [events]);
 
-  // Filtered & Sorted events
-  const filteredEvents = useMemo(() => {
-    return events
-      .filter((ev) => {
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          const matchesTitle = ev.title.toLowerCase().includes(q);
-          const matchesDesc = (ev.description || '').toLowerCase().includes(q);
-          const matchesLoc = (ev.location || '').toLowerCase().includes(q);
-          if (!matchesTitle && !matchesDesc && !matchesLoc) return false;
-        }
-        return true;
-      })
-      .sort((a, b) => {
-        if (sortBy === 'date-asc') {
-          return parseIndianDate(a.date).getTime() - parseIndianDate(b.date).getTime();
-        } else if (sortBy === 'date-desc') {
-          return parseIndianDate(b.date).getTime() - parseIndianDate(a.date).getTime();
-        } else if (sortBy === 'attendees') {
-          return (b.registrations?.length || 0) - (a.registrations?.length || 0);
-        } else {
-          return a.title.localeCompare(b.title);
-        }
-      });
-  }, [events, searchQuery, sortBy]);
+  // Sorted events (chronological order)
+  const sortedEvents = useMemo(() => {
+    return [...events].sort((a, b) => {
+      return parseIndianDate(a.date).getTime() - parseIndianDate(b.date).getTime();
+    });
+  }, [events]);
 
   // Event handlers
   const handleOpenManageModal = (event: Event) => {
@@ -275,121 +254,121 @@ export default function App() {
     addToast('Profile updated');
   };
 
-  const hasActiveFilters = searchQuery.trim() !== '';
-
   return (
-    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 flex flex-col selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#F1F5F9] font-sans text-[#0F172A] flex flex-col selection:bg-[#047857] selection:text-white">
       {/* Streamlined Executive Header */}
       <Header
         user={currentUser}
-        activeView={activeView}
-        onViewChange={setActiveView}
-        onNewEventClick={() => setIsNewEventModalOpen(true)}
-        onMyEventsClick={() => setIsMyEventsModalOpen(true)}
         onSignInClick={() => setIsSignInModalOpen(true)}
         onSignOutClick={handleSignOut}
         onEditProfileClick={() => setIsEditProfileModalOpen(true)}
-        activeEventCount={totalEvents}
       />
 
       <main className="container mx-auto px-4 lg:px-8 py-7 flex-grow">
+        {/* Page Title, Description & Action Controls Bar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-6 border-b border-[#E2E8F0]">
+          <div>
+            <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">Events</h1>
+            <p className="text-xs text-[#64748B] mt-0.5">smart event management</p>
+          </div>
+
+          {/* Action Controls Bar */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* 'events and brainstorm' buttons beside the calender button */}
+            <div className="flex items-center bg-[#F1F5F9] p-1 rounded-full border border-[#E2E8F0]">
+              <button
+                type="button"
+                onClick={() => setActiveView('events')}
+                className={`px-3.5 py-1.5 text-xs font-medium rounded-full whitespace-nowrap shrink-0 flex items-center gap-1.5 select-none transition-colors ${
+                  activeView === 'events'
+                    ? 'bg-white text-[#047857] font-semibold border border-[#10B981]/30 shadow-xs'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+              >
+                <span>Events</span>
+                <span className="font-mono text-[13px] text-[#047857] font-semibold tabular-nums">
+                  {totalEvents}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveView('ideation')}
+                className={`px-3.5 py-1.5 text-xs font-medium rounded-full whitespace-nowrap shrink-0 flex items-center gap-1.5 select-none transition-colors ${
+                  activeView === 'ideation'
+                    ? 'bg-white text-[#047857] font-semibold border border-[#10B981]/30 shadow-xs'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#FBBF24]" />
+                <span>Brainstorm</span>
+              </button>
+            </div>
+
+            {/* Calendar Button */}
+            <button
+              onClick={() => setIsCalendarModalOpen(true)}
+              className="p-2.5 rounded-full bg-white border border-[#E2E8F0] text-[#0F172A] hover:text-[#047857] hover:bg-[#F1F5F9] transition-colors shadow-xs"
+              title="Open Daily Calendar"
+              aria-label="Open Daily Calendar"
+            >
+              <Calendar className="w-4 h-4" />
+            </button>
+
+            {/* View of the events (Grid / Table toggle) */}
+            <div className="flex items-center bg-[#E2E8F0] border border-[#CBD5E1] rounded-full p-1">
+              <button
+                onClick={() => {
+                  if (activeView !== 'events') setActiveView('events');
+                  setViewMode('grid');
+                }}
+                className={`p-1.5 rounded-full transition-colors ${
+                  viewMode === 'grid' && activeView === 'events'
+                    ? 'bg-white text-[#047857] shadow-xs font-semibold'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+                title="Grid view"
+                aria-label="Grid view"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => {
+                  if (activeView !== 'events') setActiveView('events');
+                  setViewMode('table');
+                }}
+                className={`p-1.5 rounded-full transition-colors ${
+                  viewMode === 'table' && activeView === 'events'
+                    ? 'bg-white text-[#047857] shadow-xs font-semibold'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
+                }`}
+                title="Table view"
+                aria-label="Table view"
+              >
+                <Table className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Shift new event button beside the view of the events */}
+            <button
+              onClick={() => setIsNewEventModalOpen(true)}
+              className="flex items-center gap-1.5 bg-[#047857] hover:bg-[#065f46] text-white text-xs font-medium py-2 px-4 rounded-full shadow-xs transition-all whitespace-nowrap shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New Event</span>
+            </button>
+          </div>
+        </div>
+
         {/* VIEW 1: EVENTS DASHBOARD */}
         {activeView === 'events' && (
           <div className="space-y-6">
-            {/* Page Title & Quiet Metadata */}
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pb-2">
-              <div>
-                <h1 className="text-xl font-bold text-white tracking-tight">Events</h1>
-                <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
-                  <span className="font-mono tabular-nums">{totalEvents} total</span>
-                  <span aria-hidden="true" className="text-slate-600">·</span>
-                  <span className="font-mono tabular-nums">{totalRegistrations} registered</span>
-                  <span aria-hidden="true" className="text-slate-600">·</span>
-                  <span className="font-mono tabular-nums text-emerald-400">{totalCheckedIn} checked in</span>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Clean Single-Row Toolbar (Category & Status lists removed) */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              {/* Search Bar */}
-              <div className="relative flex-grow max-w-md">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search events by title, description, or location..."
-                  className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-slate-800 rounded-full text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white p-0.5 rounded-full"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Sort & View Mode */}
-              <div className="flex items-center gap-2 shrink-0">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-full text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option value="date-asc">Sort: Earliest Date</option>
-                  <option value="date-desc">Sort: Latest Date</option>
-                  <option value="attendees">Sort: Most Attendees</option>
-                  <option value="title">Sort: Title (A-Z)</option>
-                </select>
-
-                <button
-                    onClick={() => setIsCalendarModalOpen(true)}
-                    className="p-2.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
-                    title="Open Daily Calendar"
-                >
-                    <Calendar className="w-4 h-4" />
-                </button>
-
-
-                {/* Grid / Table Toggle */}
-                <div className="flex items-center bg-slate-900 border border-slate-800 rounded-full p-1">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-1.5 rounded-full transition-colors ${
-                      viewMode === 'grid'
-                        ? 'bg-slate-800 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                    title="Grid view"
-                    aria-label="Grid view"
-                  >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('table')}
-                    className={`p-1.5 rounded-full transition-colors ${
-                      viewMode === 'table'
-                        ? 'bg-slate-800 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                    title="Table view"
-                    aria-label="Table view"
-                  >
-                    <Table className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
 
             {/* Events Content Area */}
-            {filteredEvents.length > 0 ? (
+            {sortedEvents.length > 0 ? (
               viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-1">
-                  {filteredEvents.map((event) => (
+                  {sortedEvents.map((event) => (
                     <EventCard
                       key={event.id}
                       event={event}
@@ -402,7 +381,7 @@ export default function App() {
               ) : (
                 <div className="pt-1">
                   <EventsTableView
-                    events={filteredEvents}
+                    events={sortedEvents}
                     onEditClick={handleOpenManageModal}
                     onDeleteClick={handleDeleteEvent}
                     onToast={addToast}
@@ -410,34 +389,24 @@ export default function App() {
                 </div>
               )
             ) : (
-              <div className="text-center py-20 border border-dashed border-slate-800/80 rounded-2xl bg-slate-900/20">
-                <Calendar className="w-8 h-8 text-slate-600 mx-auto mb-2.5" />
-                <h3 className="text-sm font-semibold text-white mb-4">No matching events</h3>
-                <p className="text-xs text-slate-400 max-w-xs mx-auto"></p>
-                {hasActiveFilters ? (
+              <div className="text-center py-20 border border-dashed border-[#CBD5E1] rounded-2xl bg-white/70 shadow-xs">
+                <Calendar className="w-8 h-8 text-[#64748B] mx-auto mb-2.5" />
+                <h3 className="text-sm font-semibold text-[#0F172A] mb-4">No events yet</h3>
+                <div className="flex items-center justify-center gap-2">
                   <button
-                    onClick={() => setSearchQuery('')}
-                    className="px-4 py-2 text-xs font-medium rounded-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors"
+                    onClick={() => setIsNewEventModalOpen(true)}
+                    className="px-5 py-2.5 text-xs font-semibold rounded-full bg-[#047857] hover:bg-[#065f46] text-white shadow-xs transition-all"
                   >
-                    Clear Search
+                    Create Event
                   </button>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => setIsNewEventModalOpen(true)}
-                      className="px-5 py-2.5 text-xs font-semibold rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-all"
-                    >
-                      Create Event
-                    </button>
-                    <button
-                      onClick={() => setActiveView('ideation')}
-                      className="px-5 py-2.5 text-xs font-medium rounded-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1.5 transition-all"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>Brainstorm Ideas</span>
-                    </button>
-                  </div>
-                )}
+                  <button
+                    onClick={() => setActiveView('ideation')}
+                    className="px-5 py-2.5 text-xs font-medium rounded-full bg-white hover:bg-[#F1F5F9] text-[#0F172A] border border-[#CBD5E1] flex items-center gap-1.5 transition-all shadow-xs"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#FBBF24]" />
+                    <span>Brainstorm Ideas</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

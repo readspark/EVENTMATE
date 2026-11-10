@@ -57,10 +57,10 @@ export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, 
   };
 
   return (
-    <section id="ideas-section" className="bg-[#020204] border border-[#1F1F24] rounded-xl p-6 shadow-xs">
+    <section id="ideas-section" className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-xs">
       <div className="flex items-center gap-2 mb-5">
-        <Sparkles className="w-4 h-4 text-[#A78BFA]" />
-        <h2 className="text-base font-semibold text-white tracking-tight">AI Event Ideation Studio</h2>
+        <Sparkles className="w-4 h-4 text-[#FBBF24]" />
+        <h2 className="text-base font-semibold text-[#0F172A] tracking-tight">AI Event Ideation Studio</h2>
       </div>
 
       {/* Input Group */}
@@ -71,14 +71,14 @@ export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, 
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
             placeholder="Enter an industry, topic, or theme (e.g. 'Autonomous Agents', 'Sustainable Packaging Summit')..."
-            className="w-full px-4 py-2 bg-[#060608] border border-[#1F1F24] rounded-full text-white text-xs placeholder-[#71717A] focus:outline-none focus:ring-1 focus:ring-[#7C3AED] focus:border-[#7C3AED] transition-all"
+            className="w-full px-4 py-2 bg-[#F1F5F9] border border-[#E2E8F0] rounded-full text-[#0F172A] text-xs placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#047857] focus:border-[#047857] transition-all"
             onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
           />
         </div>
         <button
           onClick={() => handleGenerate()}
           disabled={isLoading || !theme.trim()}
-          className="flex items-center justify-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-medium text-xs py-2 px-5 rounded-full shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0"
+          className="flex items-center justify-center gap-1.5 bg-[#047857] hover:bg-[#065f46] text-white font-medium text-xs py-2 px-5 rounded-full shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0"
         >
           {isLoading ? (
             <>
@@ -87,7 +87,7 @@ export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, 
             </>
           ) : (
             <>
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-[#FBBF24]" />
               <span>Generate Concepts</span>
             </>
           )}
@@ -96,32 +96,32 @@ export const IdeaGenerator: React.FC<IdeaGeneratorProps> = ({ onEventGenerated, 
 
       {/* Generated Concepts Cards */}
       {ideas.length > 0 && (
-        <div className="mt-6 pt-5 border-t border-[#1F1F24] space-y-4 animate-in fade-in duration-300">
+        <div className="mt-6 pt-5 border-t border-[#E2E8F0] space-y-4 animate-in fade-in duration-300">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-white">
-              Generated Event Proposals <span className="text-xs text-[#8E8E93] font-mono">({ideas.length})</span>
+            <h3 className="text-xs font-semibold text-[#0F172A]">
+              Generated Event Proposals <span className="text-xs text-[#64748B] font-mono">({ideas.length})</span>
             </h3>
-            <span className="text-[11px] text-[#8E8E93]">Click to add concept to your active events</span>
+            <span className="text-[13px] text-[#64748B]">Click to add concept to your active events</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {ideas.map((idea, index) => (
               <div 
                 key={index} 
-                className="bg-[#060608] border border-[#1F1F24] hover:border-[#33333D] rounded-xl p-5 flex flex-col justify-between transition-all shadow-xs"
+                className="bg-[#F1F5F9] border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl p-5 flex flex-col justify-between transition-all shadow-xs"
               >
                 <div>
-                  <h4 className="font-semibold text-white text-sm mb-2">{idea.title}</h4>
-                  <div className="text-xs text-[#8E8E93] whitespace-pre-line leading-relaxed mb-4 max-h-48 overflow-y-auto pr-1">
+                  <h4 className="font-semibold text-[#0F172A] text-sm mb-2">{idea.title}</h4>
+                  <div className="text-xs text-[#64748B] whitespace-pre-line leading-relaxed mb-4 max-h-48 overflow-y-auto pr-1">
                     {idea.description}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[#18181E] flex items-center justify-between">
-                  <span className="text-[11px] text-[#8E8E93]">Auto-configures timeline & logistics</span>
+                <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between">
+                  <span className="text-[13px] text-[#64748B]">Auto-configures timeline & logistics</span>
                   <button
                     onClick={() => handleAddEvent(idea)}
-                    className="flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-medium py-1.5 px-4 rounded-full transition-all"
+                    className="flex items-center gap-1.5 bg-[#047857] hover:bg-[#065f46] text-white text-xs font-medium py-1.5 px-4 rounded-full transition-all shadow-xs"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add to Dashboard</span>

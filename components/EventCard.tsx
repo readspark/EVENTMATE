@@ -49,52 +49,52 @@ export const EventCard: React.FC<EventCardProps> = ({
 
   return (
     <div 
-      className="group bg-slate-900 border border-slate-800 hover:border-slate-700/90 rounded-xl p-5 flex flex-col justify-between transition-all duration-200 shadow-sm hover:shadow-md"
+      className="group bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl p-5 flex flex-col justify-between transition-all duration-200 shadow-xs hover:shadow-md"
       onMouseLeave={() => setIsConfirmingDelete(false)}
     >
       <div>
         {/* Zero-Pill Metadata Lead-in */}
-        <div className="flex items-center gap-2 text-xs text-slate-400 mb-2.5">
-          <span className="font-medium text-indigo-400">{event.category || 'General'}</span>
-          <span aria-hidden="true" className="text-slate-600">·</span>
+        <div className="flex items-center gap-2 text-xs text-[#64748B] mb-2.5">
+          <span className="font-semibold text-[#047857]">{event.category || 'General'}</span>
+          <span aria-hidden="true" className="text-[#CBD5E1]">·</span>
           <span className={
             currentStatus === 'In Progress'
-              ? 'text-emerald-400 font-semibold animate-pulse'
+              ? 'text-[#10B981] font-semibold animate-pulse'
               : currentStatus === 'Completed'
-              ? 'text-slate-500 font-medium'
-              : 'text-indigo-300 font-medium'
+              ? 'text-[#64748B] font-medium'
+              : 'text-[#047857] font-semibold'
           }>
             {currentStatus}
           </span>
-          <span aria-hidden="true" className="text-slate-600">·</span>
-          <span className="font-mono tabular-nums">{formatIndianDate(event.date)}</span>
+          <span aria-hidden="true" className="text-[#CBD5E1]">·</span>
+          <span className="font-mono tabular-nums text-[#64748B]">{formatIndianDate(event.date)}</span>
         </div>
 
         {/* Title */}
-        <h3 className="text-lg font-bold text-white tracking-tight group-hover:text-indigo-300 transition-colors line-clamp-1 mb-2">
+        <h3 className="text-lg font-bold text-[#0F172A] tracking-tight group-hover:text-[#047857] transition-colors line-clamp-1 mb-2">
           {event.title}
         </h3>
 
         {/* Description */}
-        <p className="text-sm text-slate-300/90 line-clamp-2 leading-relaxed mb-4">
+        <p className="text-sm text-[#64748B] line-clamp-2 leading-relaxed mb-4">
           {event.description}
         </p>
 
         {/* Logistics Information */}
-        <div className="space-y-1.5 text-xs text-slate-400 border-t border-slate-800/80 pt-3 mb-4">
+        <div className="space-y-1.5 text-xs text-[#64748B] border-t border-[#F1F5F9] pt-3 mb-4">
           <div className="flex items-center gap-2 truncate">
             {event.isVirtual ? (
-              <Video className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+              <Video className="w-3.5 h-3.5 text-sky-600 shrink-0" />
             ) : (
-              <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-[#047857] shrink-0" />
             )}
             <span className="truncate">{event.location || 'Location to be announced'}</span>
           </div>
 
           {event.time && (
             <div className="flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span className="font-mono tabular-nums">{event.time}</span>
+              <Calendar className="w-3.5 h-3.5 text-[#64748B] shrink-0" />
+              <span className="font-mono tabular-nums text-[#0F172A]">{event.time}</span>
             </div>
           )}
         </div>
@@ -102,18 +102,18 @@ export const EventCard: React.FC<EventCardProps> = ({
         {/* Capacity & Registrations Progress */}
         <div className="space-y-1.5 mb-5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-slate-500" />
+            <span className="text-[#64748B] flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-[#64748B]" />
               <span>Attendees</span>
             </span>
-            <span className="font-mono tabular-nums text-slate-300 font-medium">
-              {registrationsCount} <span className="text-slate-500 font-normal">/ {capacity} ({percentFilled}%)</span>
+            <span className="font-mono tabular-nums text-[#0F172A] font-semibold">
+              {registrationsCount} <span className="text-[#64748B] font-normal">/ {capacity} ({percentFilled}%)</span>
             </span>
           </div>
-          <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
             <div 
               className={`h-full transition-all duration-500 rounded-full ${
-                percentFilled >= 90 ? 'bg-amber-500' : 'bg-indigo-500'
+                percentFilled >= 90 ? 'bg-[#FBBF24]' : 'bg-[#047857]'
               }`}
               style={{ width: `${percentFilled}%` }}
             />
@@ -122,18 +122,18 @@ export const EventCard: React.FC<EventCardProps> = ({
       </div>
 
       {/* Action Controls */}
-      <div className="flex items-center gap-2 pt-3 border-t border-slate-800/80">
+      <div className="flex items-center gap-2 pt-3 border-t border-[#F1F5F9]">
         <button
           onClick={() => onEditClick(event)}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-full bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700/60"
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] hover:text-[#047857] transition-colors border border-[#E2E8F0]"
         >
           <span>Manage</span>
-          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+          <ArrowRight className="w-3.5 h-3.5 text-[#64748B]" />
         </button>
 
         <button
           onClick={handleCalendarDownload}
-          className="p-2 text-slate-400 hover:text-white rounded-full bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-colors"
+          className="p-2 text-[#64748B] hover:text-[#0F172A] rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] transition-colors"
           title="Download .ics Calendar Invite"
           aria-label="Download calendar invite"
         >
@@ -144,8 +144,8 @@ export const EventCard: React.FC<EventCardProps> = ({
           onClick={handleDelete}
           className={`px-3 py-2 text-xs font-semibold rounded-full transition-colors border ${
             isConfirmingDelete
-              ? 'bg-rose-900/60 text-rose-200 border-rose-700 hover:bg-rose-900'
-              : 'text-slate-400 hover:text-rose-400 bg-slate-800/60 hover:bg-slate-800 border-slate-700/60'
+              ? 'bg-rose-600 text-white border-rose-600 hover:bg-rose-700'
+              : 'text-[#64748B] hover:text-rose-600 bg-[#F1F5F9] hover:bg-rose-50 border-[#E2E8F0]'
           }`}
           title={isConfirmingDelete ? 'Click again to permanently delete' : 'Delete event'}
         >

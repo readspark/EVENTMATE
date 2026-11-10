@@ -18,10 +18,10 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
   onToast,
 }) => {
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/80 shadow-sm">
+    <div className="w-full overflow-x-auto rounded-xl border border-[#E2E8F0] bg-white shadow-xs">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-900">
+          <tr className="border-b border-[#E2E8F0] text-xs font-semibold text-[#64748B] uppercase tracking-wider bg-[#F1F5F9]">
             <th className="py-3 px-4">Event & Category</th>
             <th className="py-3 px-4">Date & Time</th>
             <th className="py-3 px-4">Location / Format</th>
@@ -30,7 +30,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
             <th className="py-3 px-4 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800/80 text-sm">
+        <tbody className="divide-y divide-[#F1F5F9] text-sm">
           {events.map((event) => {
             const count = event.registrations?.length || 0;
             const cap = event.capacity || 100;
@@ -40,42 +40,42 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
             return (
               <tr 
                 key={event.id}
-                className="hover:bg-slate-800/40 transition-colors group cursor-pointer"
+                className="hover:bg-[#F1F5F9]/60 transition-colors group cursor-pointer"
                 onClick={() => onEditClick(event)}
               >
                 <td className="py-3.5 px-4">
-                  <div className="font-semibold text-white group-hover:text-indigo-300 transition-colors">
+                  <div className="font-semibold text-[#0F172A] group-hover:text-[#047857] transition-colors">
                     {event.title}
                   </div>
-                  <div className="text-xs text-slate-400 mt-0.5">
+                  <div className="text-xs text-[#64748B] mt-0.5">
                     <span>{event.category || 'General'}</span>
                   </div>
                 </td>
 
-                <td className="py-3.5 px-4 text-xs font-mono tabular-nums text-slate-300 whitespace-nowrap">
+                <td className="py-3.5 px-4 text-xs font-mono tabular-nums text-[#0F172A] whitespace-nowrap">
                   <div>{formatIndianDate(event.date)}</div>
-                  <div className="text-slate-500">{event.time || 'Schedule pending'}</div>
+                  <div className="text-[#64748B]">{event.time || 'Schedule pending'}</div>
                 </td>
 
-                <td className="py-3.5 px-4 text-xs text-slate-300 max-w-xs truncate">
+                <td className="py-3.5 px-4 text-xs text-[#0F172A] max-w-xs truncate">
                   <div className="flex items-center gap-1.5 truncate">
                     {event.isVirtual ? (
-                      <Video className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                      <Video className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                     ) : (
-                      <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <MapPin className="w-3.5 h-3.5 text-[#047857] shrink-0" />
                     )}
                     <span className="truncate">{event.location}</span>
                   </div>
                 </td>
 
                 <td className="py-3.5 px-4 text-right">
-                  <div className="font-mono tabular-nums text-xs text-slate-200">
+                  <div className="font-mono tabular-nums text-xs text-[#0F172A]">
                     <span className="font-semibold">{count}</span>
-                    <span className="text-slate-500"> / {cap} ({pct}%)</span>
+                    <span className="text-[#64748B]"> / {cap} ({pct}%)</span>
                   </div>
-                  <div className="w-24 h-1 bg-slate-800 rounded-full ml-auto mt-1 overflow-hidden">
+                  <div className="w-24 h-1 bg-[#F1F5F9] rounded-full ml-auto mt-1 overflow-hidden">
                     <div 
-                      className={`h-full rounded-full ${pct >= 90 ? 'bg-amber-500' : 'bg-indigo-500'}`}
+                      className={`h-full rounded-full ${pct >= 90 ? 'bg-[#FBBF24]' : 'bg-[#047857]'}`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -84,10 +84,10 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                 <td className="py-3.5 px-4 text-center">
                   <span className={`text-xs font-medium ${
                     status === 'In Progress' 
-                      ? 'text-emerald-400 font-semibold' 
+                      ? 'text-[#10B981] font-semibold' 
                       : status === 'Completed'
-                      ? 'text-slate-500'
-                      : 'text-indigo-300'
+                      ? 'text-[#64748B]'
+                      : 'text-[#047857] font-semibold'
                   }`}>
                     {status}
                   </span>
@@ -97,11 +97,11 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                   <div className="flex items-center justify-end gap-1.5">
                     <button
                       onClick={() => onEditClick(event)}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-full bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1"
+                      className="px-3 py-1.5 text-xs font-semibold rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] hover:text-[#047857] border border-[#E2E8F0] flex items-center gap-1"
                       title="Manage event"
                     >
                       <span>Manage</span>
-                      <ArrowRight className="w-3 h-3 text-slate-400" />
+                      <ArrowRight className="w-3 h-3 text-[#64748B]" />
                     </button>
 
                     <button
@@ -109,7 +109,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                         const success = downloadIcsCalendarFile(event);
                         if (success && onToast) onToast(`Calendar invite (.ics) downloaded for "${event.title}"`);
                       }}
-                      className="p-1.5 text-slate-400 hover:text-white rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700"
+                      className="p-1.5 text-[#64748B] hover:text-[#0F172A] rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] border border-[#E2E8F0]"
                       title="Export .ics invite"
                     >
                       <CalendarPlus className="w-3.5 h-3.5" />
@@ -122,7 +122,7 @@ export const EventsTableView: React.FC<EventsTableViewProps> = ({
                           if (onToast) onToast(`Event deleted`);
                         }
                       }}
-                      className="p-1.5 text-slate-400 hover:text-rose-400 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700"
+                      className="p-1.5 text-[#64748B] hover:text-rose-600 rounded-full bg-[#F1F5F9] hover:bg-rose-50 border border-[#E2E8F0]"
                       title="Delete event"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

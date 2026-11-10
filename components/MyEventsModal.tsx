@@ -14,16 +14,16 @@ export const MyEventsModal: React.FC<MyEventsModalProps> = ({ isOpen, onClose, e
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-w-lg w-full p-6 relative">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+    <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] mb-4">
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Active Event Portfolio</h2>
-            <p className="text-xs text-slate-400 font-mono tabular-nums">{events.length} planned events</p>
+            <h2 className="text-base font-bold text-[#0F172A] tracking-tight">Active Event Portfolio</h2>
+            <p className="text-xs text-[#64748B] font-mono tabular-nums">{events.length} planned events</p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+            className="text-[#64748B] hover:text-[#0F172A] p-1 rounded-full hover:bg-[#F1F5F9] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -40,37 +40,37 @@ export const MyEventsModal: React.FC<MyEventsModalProps> = ({ isOpen, onClose, e
                     onClose();
                   }
                 }}
-                className="bg-slate-950/80 border border-slate-800 hover:border-slate-700 p-3.5 rounded-xl flex items-center justify-between gap-3 cursor-pointer group transition-colors"
+                className="bg-[#F1F5F9] border border-[#E2E8F0] hover:border-[#10B981]/60 hover:bg-[#F1F5F9]/90 p-3.5 rounded-xl flex items-center justify-between gap-3 cursor-pointer group transition-colors text-[#0F172A]"
               >
                 <div className="min-w-0">
-                  <div className="font-semibold text-white text-sm truncate group-hover:text-indigo-300 transition-colors">
+                  <div className="font-semibold text-[#0F172A] text-sm truncate group-hover:text-[#047857] transition-colors">
                     {event.title}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-                    <span className="font-mono tabular-nums">{formatIndianDate(event.date)}</span>
-                    <span aria-hidden="true" className="text-slate-600">·</span>
+                  <div className="flex items-center gap-2 text-xs text-[#64748B] mt-1">
+                    <span className="font-mono tabular-nums text-[#047857] font-semibold">{formatIndianDate(event.date)}</span>
+                    <span aria-hidden="true" className="text-[#CBD5E1]">·</span>
                     <span className="truncate">{event.location}</span>
-                    <span aria-hidden="true" className="text-slate-600">·</span>
-                    <span className="font-mono tabular-nums">{event.registrations?.length || 0} registered</span>
+                    <span aria-hidden="true" className="text-[#CBD5E1]">·</span>
+                    <span className="font-mono tabular-nums text-[#64748B]">{event.registrations?.length || 0} registered</span>
                   </div>
                 </div>
 
-                <div className="p-1 text-slate-500 group-hover:text-indigo-400 transition-colors shrink-0">
+                <div className="p-1 text-[#64748B] group-hover:text-[#047857] transition-colors shrink-0">
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-xs text-slate-400 border border-dashed border-slate-800 rounded-xl">
+          <div className="text-center py-12 text-xs text-[#64748B] border border-dashed border-[#CBD5E1] rounded-xl">
             No events planned yet. Use the ideation tool or create your first event!
           </div>
         )}
 
-        <div className="pt-4 mt-4 border-t border-slate-800">
+        <div className="pt-4 mt-4 border-t border-[#E2E8F0]">
           <button
             onClick={onClose}
-            className="w-full py-2.5 px-4 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
+            className="w-full py-2.5 px-4 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] hover:text-[#047857] text-xs font-semibold transition-colors"
           >
             Close
           </button>

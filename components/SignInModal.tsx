@@ -84,22 +84,22 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
   const inIframe = isRunningInIframe();
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-w-sm w-full p-6 relative">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+    <div className="fixed inset-0 bg-[#0F172A]/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white border border-[#E2E8F0] rounded-xl shadow-xl max-w-sm w-full p-6 relative">
+        <div className="flex items-center justify-between pb-3 border-b border-[#F1F5F9] mb-4">
           <div className="flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-bold text-white tracking-tight">Sign In</h2>
+            <UserIcon className="w-5 h-5 text-[#047857]" />
+            <h2 className="text-base font-bold text-[#0F172A] tracking-tight">Sign In</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+            className="text-[#64748B] hover:text-[#0F172A] p-1 rounded-full hover:bg-[#F1F5F9] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+        <p className="text-xs text-[#64748B] mb-4 leading-relaxed">
           Sign in to save your planned events, customize organizer email signatures, and manage attendees.
         </p>
 
@@ -109,10 +109,10 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs rounded-full shadow transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold text-xs rounded-full shadow-xs transition-colors disabled:opacity-50"
           >
             {isGoogleLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin text-slate-900" />
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
             ) : (
               <svg className="w-4 h-4" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -128,24 +128,24 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
             type="button"
             onClick={handleGoogleRedirect}
             disabled={isGoogleLoading}
-            className="w-full text-center text-[11px] text-slate-400 hover:text-indigo-400 py-1.5 px-3 rounded-full transition-colors flex items-center justify-center gap-1.5"
+            className="w-full text-center text-[13px] text-[#64748B] hover:text-[#047857] py-1.5 px-3 rounded-full transition-colors flex items-center justify-center gap-1.5"
             title="Redirect to web for sign in"
           >
             <span>Redirect to web for sign in</span>
-            {inIframe ? <ExternalLink className="w-3 h-3 text-slate-400" /> : <ArrowRight className="w-3 h-3 text-slate-400" />}
+            {inIframe ? <ExternalLink className="w-3 h-3 text-[#64748B]" /> : <ArrowRight className="w-3 h-3 text-[#64748B]" />}
           </button>
         </div>
 
         {error && (
-          <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-800/60 text-amber-200 text-xs mb-3 leading-relaxed">
+          <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs mb-3 leading-relaxed">
             {error}
           </div>
         )}
 
         {/* Divider */}
         <div className="relative flex items-center justify-center my-4">
-          <div className="w-full border-t border-slate-800" />
-          <span className="bg-slate-900 px-2 text-[11px] text-slate-500 uppercase tracking-wider absolute">
+          <div className="w-full border-t border-[#E2E8F0]" />
+          <span className="bg-white px-2 text-[13px] text-[#64748B] uppercase tracking-wider absolute">
             or enter profile manually
           </span>
         </div>
@@ -153,7 +153,7 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
         {/* Manual Form */}
         <form onSubmit={handleManualSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-1">
               Full Name
             </label>
             <input
@@ -161,12 +161,12 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Alex Morgan"
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg text-[#0F172A] text-xs focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#047857]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-1">
               Work Email
             </label>
             <input
@@ -174,12 +174,12 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="alex@company.com"
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg text-[#0F172A] text-xs focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#047857]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-1">
               Role / Title
             </label>
             <input
@@ -187,13 +187,13 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onSig
               value={role}
               onChange={(e) => setRole(e.target.value)}
               placeholder="e.g. Event Director"
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full px-3 py-2 bg-[#F1F5F9] border border-[#E2E8F0] rounded-lg text-[#0F172A] text-xs focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#047857]"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-2.5 px-4 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-colors mt-2"
+            className="w-full py-2.5 px-4 rounded-full bg-[#047857] hover:bg-[#065f46] text-white text-xs font-semibold shadow-xs transition-colors mt-2"
           >
             Save Profile & Continue
           </button>

@@ -57,9 +57,17 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
 
   return (
     <>
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 z-40 bg-[#0F172A]/25 backdrop-blur-sm transition-opacity duration-200 animate-in fade-in"
+          aria-hidden="true"
+        />
+      )}
+
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-40 bg-[#7C3AED] hover:bg-[#6D28D9] text-white w-14 h-14 rounded-full shadow-xl hover:shadow-[#7C3AED]/25 flex items-center justify-center transition-all focus:outline-none"
+        className="fixed bottom-6 right-6 z-50 bg-[#047857] hover:bg-[#065f46] text-white w-14 h-14 rounded-full shadow-xl hover:shadow-[#047857]/25 flex items-center justify-center transition-all focus:outline-none"
         aria-label="Open AI Planning Assistant"
         title="EventMate AI Assistant"
       >
@@ -67,30 +75,30 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-[85px] right-6 z-50 w-[420px] max-w-[calc(100vw-32px)] sm:w-[460px] h-[420px] bg-[#020204] border border-[#1F1F24] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-[85px] right-6 z-50 w-[420px] max-w-[calc(100vw-32px)] sm:w-[460px] h-[420px] bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
-          <div className="p-3 px-4 bg-[#060608] border-b border-[#1F1F24] flex items-center justify-between">
+          <div className="p-3 px-4 bg-[#F1F5F9] border-b border-[#E2E8F0] flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-[#181126] border border-[#7C3AED]/30 flex items-center justify-center text-[#A78BFA] shrink-0">
+              <div className="w-7 h-7 rounded-full bg-emerald-50 border border-[#10B981]/30 flex items-center justify-center text-[#047857] shrink-0">
                 <Bot className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white leading-none">EventMate AI Partner</h3>
-                <div className="text-xs text-[#8E8E93] mt-1">
+                <h3 className="text-sm font-semibold text-[#0F172A] leading-none">EventMate AI Partner</h3>
+                <div className="text-xs text-[#64748B] mt-1">
                   Direct Definite Guidance
                 </div>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-[#8E8E93] hover:text-white p-1.5 rounded-full hover:bg-[#121215] transition-colors"
+              className="text-[#64748B] hover:text-[#0F172A] p-1.5 rounded-full hover:bg-[#E2E8F0] transition-colors"
             >
               <X className="w-4.5 h-4.5" />
             </button>
           </div>
 
           {/* Chat Messages */}
-          <div ref={chatboxRef} className="flex-grow p-3.5 space-y-3 overflow-y-auto bg-[#020204]">
+          <div ref={chatboxRef} className="flex-grow p-3.5 space-y-3 overflow-y-auto bg-white">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -99,14 +107,14 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
                 <div
                   className={`relative group rounded-xl px-3.5 py-2.5 max-w-[88%] text-sm leading-relaxed ${
                     msg.sender === 'user'
-                      ? 'bg-[#7C3AED] text-white shadow-xs font-medium'
-                      : 'bg-[#0A0A0E] text-[#E4E4E7] border border-[#1F1F24] shadow-xs'
+                      ? 'bg-[#047857] text-white shadow-xs font-medium'
+                      : 'bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0] shadow-xs'
                   }`}
                 >
                   {msg.isLoading ? (
                     <div className="flex items-center gap-2 py-0.5">
-                      <Loader2 className="w-4 h-4 animate-spin text-[#A78BFA]" />
-                      <span className="text-[#8E8E93] text-sm">Evaluating...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#047857]" />
+                      <span className="text-[#64748B] text-sm">Evaluating...</span>
                     </div>
                   ) : (
                     <>
@@ -114,7 +122,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
                       {msg.sender === 'bot' && (
                         <button
                           onClick={() => handleCopyMessage(msg.id, msg.text)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2.5 right-2 p-1 bg-black border border-[#1F1F24] rounded-full text-[#8E8E93] hover:text-[#A78BFA]"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-2.5 right-2 p-1 bg-white border border-[#E2E8F0] rounded-full text-[#64748B] hover:text-[#047857] shadow-xs"
                           title="Copy response"
                         >
                           {copiedId === msg.id ? (
@@ -132,19 +140,19 @@ export const Chatbot: React.FC<ChatbotProps> = ({ availableEvents, onToast }) =>
           </div>
 
           {/* Input Footer */}
-          <div className="p-3 px-3.5 bg-[#060608] border-t border-[#1F1F24] flex items-center gap-2.5">
+          <div className="p-3 px-3.5 bg-[#F1F5F9] border-t border-[#E2E8F0] flex items-center gap-2.5">
             <input
               type="text"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Ask a definite question..."
-              className="flex-grow px-3.5 py-2 bg-[#0A0A0E] border border-[#1F1F24] rounded-full text-sm text-white placeholder-[#71717A] focus:outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
+              className="flex-grow px-3.5 py-2 bg-white border border-[#E2E8F0] rounded-full text-sm text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#047857] focus:border-[#047857] transition-all"
             />
             <button
               onClick={() => handleSendMessage()}
               disabled={!userInput.trim()}
-              className="p-2 bg-[#7C3AED] hover:bg-[#6D28D9] disabled:opacity-40 text-white rounded-full transition-all shrink-0"
+              className="p-2 bg-[#047857] hover:bg-[#065f46] disabled:opacity-40 text-white rounded-full transition-all shrink-0 shadow-xs"
               title="Send message"
             >
               <Send className="w-4 h-4" />
